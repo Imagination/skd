@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block menu %}
+    {% with "users" as current_category %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block header %}
+    <a href="{% url users_list %}">{% trans "Users"%}</a>
+    >>
+    <a href="{% url users_groups_list user=group_member.id %}">{% trans "Groups" %}</a>
+    >>
+    {% trans "Assign" %}
+{% endblock header %}
+
+{% block content %}
+
+<span class="error">{{ form.non_field_errors }}</span>
+
+<form action="" method="post">
+    {% csrf_token %}
+    <div>
+        {{ form.group.label_tag }}
+        {{ form.group }}
+        <span class="error">{{ form.group.errors }}</span>
+    </div>
+    <div>
+        {{ form.user.label_tag }}
+        {{ group_member }}
+        <input type="hidden" name="{{ form.user.html_name }}"
+               value="{{ form.user.value }}" />
+        <span class="error">{{ form.user.errors }}</span>
+    </div>
+    <br />
+    <div>
+        <input id="submit_action" type="submit" value="{% trans "Submit" %}"/>
+        <input id="cancel_action" type="button" value="{% trans "Cancel" %}"
+               onclick="window.history.back()" />
+    </div>
+</form>
+
+{% endblock content %}

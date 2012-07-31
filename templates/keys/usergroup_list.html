@@ -1,0 +1,57 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block menu %}
+    {% with "usergroups" as current_category %}
+    {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block header %}
+{% trans "Usergroups" %}
+{% endblock header %}
+
+{% block content %}
+{% if usergroups %}
+    <div class="datagrid">
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Groupname" %}</th>
+                    <th colspan="2">&nbsp;</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for usergroup in usergroups %}
+            <tr title="{{ usergroup.comment }}">
+                <td>
+                    <a href="{% url usergroups_edit pk=usergroup.id %}">
+                        {{ usergroup.name }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url usergroups_delete pk=usergroup.id %}">
+                        {% trans "Delete" %}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url usergroups_users_list usergroup=usergroup.id %}">
+                       {% trans "Members" %}
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+{% else %}
+    <p>{% trans "No usergroups exist." %}</p>
+{% endif %}
+
+<p><a href="{% url usergroups_create %}">{% trans "Create usergroup" %}</a></p>
+
+{% endblock content %}

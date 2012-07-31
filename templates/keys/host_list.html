@@ -1,0 +1,59 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block menu %}
+    {% with "hosts" as current_category %}
+    {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block header %}
+{% trans "Hosts" %}
+{% endblock header %}
+
+{% block content %}
+{% if users %}
+    <div class="datagrid">
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "FQDN" %}</th>
+                    <th colspan="2">&nbsp;</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for host in hosts %}
+            <tr title="{{ host.comment }}">
+                <td>
+                    <a href="{% url hosts_edit pk=user.id %}">
+                        {{ host.name }}
+                    </a>
+                </td>
+                <td>{{ host.fqdn }}</td>
+                <td>
+                    <a href="{% url hosts_delete pk=user.id %}">
+                        {% trans "Delete" %}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url hosts_group_list host=host.id %}">
+                        {% trans "Groups" %}
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+{% else %}
+    <p>{% trans "No hosts exist." %}</p>
+{% endif %}
+
+<p><a href="{% url hosts_create %}">{% trans "Create host" %}</a></p>
+
+{% endblock content %}

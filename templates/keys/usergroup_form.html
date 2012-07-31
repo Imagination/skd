@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block menu %}
+    {% with "usergroups" as current_category %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block header %}
+
+    <a href="{% url usergroups_list %}">{% trans "Usergroups"%}</a>
+    >>
+
+{% if object.name %}
+    {% trans "Edit" %}
+{% else %}
+    {% trans "Create new usergroup" %}
+{% endif %}
+
+{% endblock header %}
+
+{% block content %}
+
+<form action="" method="post">
+    {% csrf_token %}
+    <div>
+        {{ form.name.label_tag }}
+        {{ form.name }}
+    </div>
+    <div>
+          {{ form.comment.label_tag }}
+          {{ form.comment }}
+    </div>
+    <br />
+    <div>
+        <input id="submit_action" type="submit" value="{% trans 'Submit' %}"/>
+        <input id="cancel_action" type="button" value="{% trans "Cancel" %}"
+               onclick="window.history.back()" />
+    </div>
+</form>
+
+{% endblock content %}

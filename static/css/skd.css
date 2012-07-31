@@ -1,0 +1,31 @@
+html {
+    background: #d3d3d3;
+}
+
+div#border {
+    margin: 1em;
+    text-align: justify;
+    padding: 1em;
+    background: #ffffff;
+    border: 1px solid #000000;
+}
+
+div#menu ul {
+
+    list-style: none;
+    background: #add8e6;
+    padding: 1em;
+
+}
+
+div#menu ul li {
+
+    padding: 0.5em;
+
+}
+
+div#menu ul li:hover {
+
+    background: #ffffff;
+
+}

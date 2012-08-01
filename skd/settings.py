@@ -162,3 +162,7 @@ LOGGING = {
         },
     }
 }
+
+# Authentication settings
+
+LOGIN_URL = "/login"

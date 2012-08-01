@@ -12,6 +12,13 @@ header {
 
 }
 
+div#userinfo {
+
+    font-size: 0.4em;
+    float:right;
+
+}
+
 div#border {
     margin: 1em;
     text-align: justify;
@@ -59,6 +66,12 @@ div#menu ul li.currentMenu {
 div#main {
 
     padding-left: 16em;
+
+}
+
+div#login {
+
+    text-align: center;
 
 }
 

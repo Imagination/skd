@@ -1,13 +1,17 @@
+import django
 from django.conf.urls import patterns, include, url
 
 # Uncomment the next two lines to enable the admin:
-#from django.contrib import admin
-#admin.autodiscover()
+from django.contrib import admin
+from django.contrib.auth.decorators import login_required
+
+admin.autodiscover()
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django.views.generic.list import ListView
 from keys.models import User, Host, UserGroup, HostGroup
 from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, UserKeyDeleteView, UserGroupListView, UserGroupAssignView, UserGroupUnassignView, UserGroupUserListView, UserGroupUserAssignView, UserGroupUserUnassignView, HostGroupUnassignView, HostGroupAssignView, HostGroupListView, HostGroupHostListView, HostGroupHostAssignView, HostGroupHostUnassignView, UserGroupHostGroupListView, UserGroupHostGroupAssignView, UserGroupHostGroupUnassignView, HostGroupUserGroupListView, HostGroupUserGroupAssignView, HostGroupUserGroupUnassignView
+
 
 urlpatterns = patterns('keys.views',
 
@@ -15,8 +19,10 @@ urlpatterns = patterns('keys.views',
 
     url(
         r"^$",
-        TemplateView.as_view(
-            template_name="keys/home.html"
+        login_required(
+            TemplateView.as_view(
+                template_name="keys/home.html"
+            )
         ),
         name = "home"
     ),
@@ -304,15 +310,43 @@ urlpatterns = patterns('keys.views',
         HostGroupUserGroupUnassignView.as_view(),
         name = "hostgroups_usergroups_unassign"
     ),
-    
 
-    #url(r'^hosts/list$', 'list_hosts', name='list_hosts'),
     #url(r'^apply$', 'apply', name='apply')
-    # url(r'^skd/', include('skd.foo.urls')),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+)
 
-    # Uncomment the next line to enable the admin:
-    #url(r'^admin/', include(admin.site.urls)),
+urlpatterns += patterns('',
+
+    url(
+        r"^logout$",
+        "django.contrib.auth.views.logout",
+        {
+            "next_page" : "/"
+        },
+        name = "logout"
+    ),
+
+    url(
+        r"^login$",
+        "django.contrib.auth.views.login",
+        name = "login"
+    ),
+
+    url(
+        r"^password/change$",
+        "django.contrib.auth.views.password_change",
+        name = "password_change"
+    ),
+
+    url(
+        r"^password/change/done$",
+        "django.contrib.auth.views.password_change_done",
+        name = "password_change_done"
+    ),
+
+    url(
+        r'^admin/',
+        include(admin.site.urls)
+    )
+
 )

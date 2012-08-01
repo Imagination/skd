@@ -55,6 +55,32 @@ chromium.org/developers/how-tos/chrome-frame-getting-started -->
             {% block header %}
             {% endblock header %}
 
+            {% if user.is_authenticated %}
+
+                <div id="userinfo">
+
+                    {% blocktrans with user=user.username %}
+
+                        Welcome, {{ user }}!
+
+                    {% endblocktrans %}
+
+                    <a href="{% url password_change %}">{% trans "Change password" %}</a>
+
+                    {% if user.is_staff %}
+
+                        <a href="{% url admin:index %}">
+                            {% trans "Administration" %}
+                        </a>
+
+                    {% endif %}
+
+                    <a href="{% url logout %}">{% trans "Logout" %}</a>
+
+                </div>
+
+            {% endif %}
+
         </header>
 
         <div id="menu">
@@ -72,6 +98,8 @@ chromium.org/developers/how-tos/chrome-frame-getting-started -->
 
                     </li>
 
+                    {% if perms.keys.list_users %}
+
                     <li onclick="window.location='{% url users_list %}'"
                         {% if current_category == "users" %}
                             class="currentMenu"
@@ -81,6 +109,10 @@ chromium.org/developers/how-tos/chrome-frame-getting-started -->
                         {% trans "Manage users" %}
 
                     </li>
+
+                    {% endif %}
+
+                    {% if perms.keys.list_usergroups %}
 
                     <li onclick="window.location='{% url usergroups_list %}'"
                         {% if current_category == "usergroups" %}
@@ -92,6 +124,10 @@ chromium.org/developers/how-tos/chrome-frame-getting-started -->
 
                     </li>
 
+                    {% endif %}
+
+                    {% if perms.keys.list_hosts %}
+
                     <li onclick="window.location='{% url hosts_list %}'"
                         {% if current_category == "hosts" %}
                             class="currentMenu"
@@ -101,6 +137,10 @@ chromium.org/developers/how-tos/chrome-frame-getting-started -->
                         {% trans "Manage hosts" %}
 
                     </li>
+
+                    {% endif %}
+
+                    {% if perms.keys.list_hostgroups %}
 
                     <li onclick="window.location='{% url hostgroups_list %}'"
                         {% if current_category == "hostgroups" %}
@@ -112,7 +152,14 @@ chromium.org/developers/how-tos/chrome-frame-getting-started -->
 
                     </li>
 
+                    {% endif %}
+
+                    {% if perms.keys.can_apply %}
+
                     <li>{% trans "Apply changes" %}</li>
+
+                    {% endif %}
+
                 </ul>
 
             {% endblock menu %}

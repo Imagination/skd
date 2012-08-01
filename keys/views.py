@@ -9,6 +9,21 @@ from keys.models import User,Key, UserGroup, UserInGroup, HostInGroup, Host, Hos
 # User/Key
 
 class UserKeyListView(ListView):
+    """
+    Lists keys from a given user.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``key_owner``
+        An instance of the owner holding the keys.
+
+    **Template:**
+
+    :template:`keys/key_list.html`
+
+    """
 
     context_object_name = "user_keys"
     template_name = "keys/key_list.html"
@@ -25,6 +40,21 @@ class UserKeyListView(ListView):
         return context
 
 class UserKeyCreateView(CreateView):
+    """
+    Adds a new key for a user.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``key_owner``
+        An instance of the owner holding the key.
+
+    **Template:**
+
+    :template:`keys/key_form.html`
+
+    """
 
     template_name = "keys/key_form.html"
 
@@ -49,6 +79,21 @@ class UserKeyCreateView(CreateView):
         )
 
 class UserKeyUpdateView(UpdateView):
+    """
+    Edits an existing key of a user.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``key_owner``
+        An instance of the owner holding the key.
+
+    **Template:**
+
+    :template:`keys/key_form.html`
+
+    """
 
     template_name = "keys/key_form.html"
 
@@ -73,6 +118,21 @@ class UserKeyUpdateView(UpdateView):
         )
 
 class UserKeyDeleteView(DeleteView):
+    """
+    Removes an existing key for a user.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``key_owner``
+        An instance of the owner holding the key.
+
+    **Template:**
+
+    :template:`keys/key_confirm_delete.html`
+
+    """
 
     template_name = "keys/key_confirm_delete.html"
 
@@ -96,6 +156,21 @@ class UserKeyDeleteView(DeleteView):
 # User/Group
 
 class UserGroupListView(ListView):
+    """
+    Lists groups a user is member of.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``group_member``
+        The member of the groups.
+
+    **Template:**
+
+    :template:`keys/user_groups_list.html`
+
+    """
 
     context_object_name = "user_groups"
     template_name = "keys/user_groups_list.html"
@@ -112,6 +187,21 @@ class UserGroupListView(ListView):
         return context
 
 class UserGroupAssignView(CreateView):
+    """
+    Assigns a user to a new group.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``group_member``
+        The member of the group to be.
+
+    **Template:**
+
+    :template:`keys/user_groups_assign.html`
+
+    """
 
     template_name = "keys/user_groups_assign.html"
 
@@ -136,6 +226,21 @@ class UserGroupAssignView(CreateView):
         )
 
 class UserGroupUnassignView(DeleteView):
+    """
+    Removes a member from a group.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``group_member``
+        The member of the group.
+
+    **Template:**
+
+    :template:`keys/user_groups_unassign_confirm.html`
+
+    """
 
     template_name = "keys/user_groups_unassign_confirm.html"
 
@@ -163,6 +268,21 @@ class UserGroupUnassignView(DeleteView):
 # Usergroup/User
 
 class UserGroupUserListView(ListView):
+    """
+    Lists members of a usergroup.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``usergroup``
+        The usergroup.
+
+    **Template:**
+
+    :template:`keys/usergroup_users_list.html`
+
+    """
 
     context_object_name = "usergroup_users"
     template_name = "keys/usergroup_users_list.html"
@@ -179,6 +299,21 @@ class UserGroupUserListView(ListView):
         return context
 
 class UserGroupUserAssignView(CreateView):
+    """
+    Adds a new member to an usergroup.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``usergroup``
+        The usergroup.
+
+    **Template:**
+
+    :template:`keys/usergroup_users_assign.html`
+
+    """
 
     template_name = "keys/usergroup_users_assign.html"
 
@@ -203,6 +338,21 @@ class UserGroupUserAssignView(CreateView):
         )
 
 class UserGroupUserUnassignView(DeleteView):
+    """
+    Removes a member from an usergroup.
+
+    **Context**
+
+    ``RequestContext``
+
+    ``usergroup``
+        The usergroup.
+
+    **Template:**
+
+    :template:`keys/usergroup_users_unassign_confirm.html`
+
+    """
 
     template_name = "keys/usergroup_users_unassign_confirm.html"
 
@@ -230,6 +380,21 @@ class UserGroupUserUnassignView(DeleteView):
 # Usergroup/Hostgroup
 
 class UserGroupHostGroupListView(ListView):
+    """
+    Lists hostgroup assignments of an usergroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``usergroup``
+        The usergroup.
+
+    **Template:**
+
+    :template:`keys/usergroup_hostgroups_list.html`
+
+    """
 
     context_object_name = "usergroup_hostgroups"
     template_name = "keys/usergroup_hostgroups_list.html"
@@ -246,6 +411,21 @@ class UserGroupHostGroupListView(ListView):
         return context
 
 class UserGroupHostGroupAssignView(CreateView):
+    """
+    Assigns a new hostgroup to a usergroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``usergroup``
+        The usergroup.
+
+    **Template:**
+
+    :template:`keys/usergroup_hostgroups_assign.html`
+
+    """
 
     template_name = "keys/usergroup_hostgroups_assign.html"
 
@@ -270,6 +450,21 @@ class UserGroupHostGroupAssignView(CreateView):
         )
 
 class UserGroupHostGroupUnassignView(DeleteView):
+    """
+    Unassigns a hostgroup from a usergroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``usergroup``
+        The usergroup.
+
+    **Template:**
+
+    :template:`keys/usergroup_hostgroups_unassign_confirm.html`
+
+    """
 
     template_name = "keys/usergroup_hostgroups_unassign_confirm.html"
 
@@ -299,6 +494,21 @@ class UserGroupHostGroupUnassignView(DeleteView):
 # Host/Group
 
 class HostGroupListView(ListView):
+    """
+    Lists hostgroups a host is member of
+
+    **Context**
+
+    ``RequestContext``
+
+    ``group_member``
+        The group member.
+
+    **Template:**
+
+    :template:`keys/host_groups_list.html`
+
+    """
 
     context_object_name = "host_groups"
     template_name = "keys/host_groups_list.html"
@@ -315,6 +525,21 @@ class HostGroupListView(ListView):
         return context
 
 class HostGroupAssignView(CreateView):
+    """
+    Assign a host to a hostgroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``group_member``
+        The group member to be.
+
+    **Template:**
+
+    :template:`keys/host_groups_assign.html`
+
+    """
 
     template_name = "keys/host_groups_assign.html"
 
@@ -339,6 +564,21 @@ class HostGroupAssignView(CreateView):
         )
 
 class HostGroupUnassignView(DeleteView):
+    """
+    Unassign a host from a hostgroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``group_member``
+        The group member.
+
+    **Template:**
+
+    :template:`keys/host_groups_unassign_confirm.html`
+
+    """
 
     template_name = "keys/host_groups_unassign_confirm.html"
 
@@ -366,6 +606,21 @@ class HostGroupUnassignView(DeleteView):
 # Hostgroup/Host
 
 class HostGroupHostListView(ListView):
+    """
+    Lists the member hosts of a hostgroups
+
+    **Context**
+
+    ``RequestContext``
+
+    ``hostgroup``
+        The hostgroup.
+
+    **Template:**
+
+    :template:`keys/hostgroup_hosts_list.html`
+
+    """
 
     context_object_name = "hostgroup_hosts"
     template_name = "keys/hostgroup_hosts_list.html"
@@ -382,6 +637,21 @@ class HostGroupHostListView(ListView):
         return context
 
 class HostGroupHostAssignView(CreateView):
+    """
+    Adds a host to a hostgroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``hostgroup``
+        The hostgroup.
+
+    **Template:**
+
+    :template:`keys/hostgroup_hosts_assign.html`
+
+    """
 
     template_name = "keys/hostgroup_hosts_assign.html"
 
@@ -406,6 +676,21 @@ class HostGroupHostAssignView(CreateView):
         )
 
 class HostGroupHostUnassignView(DeleteView):
+    """
+    Removes a host from a hostgroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``hostgroup``
+        The hostgroup.
+
+    **Template:**
+
+    :template:`keys/hostgroup_hosts_unassign_confirm.html`
+
+    """
 
     template_name = "keys/hostgroup_hosts_unassign_confirm.html"
 
@@ -433,6 +718,21 @@ class HostGroupHostUnassignView(DeleteView):
 # Hostgroup/Usergroup
 
 class HostGroupUserGroupListView(ListView):
+    """
+    Lists the usergroups assigned to a hostgroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``hostgroup``
+        The hostgroup.
+
+    **Template:**
+
+    :template:`keys/hostgroup_usergroups_list.html`
+
+    """
 
     context_object_name = "hostgroup_usergroups"
     template_name = "keys/hostgroup_usergroups_list.html"
@@ -449,6 +749,21 @@ class HostGroupUserGroupListView(ListView):
         return context
 
 class HostGroupUserGroupAssignView(CreateView):
+    """
+    Assigns an usergroup to a hostgroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``hostgroup``
+        The hostgroup.
+
+    **Template:**
+
+    :template:`keys/hostgroup_usergroups_assign.html`
+
+    """
 
     template_name = "keys/hostgroup_usergroups_assign.html"
 
@@ -473,6 +788,21 @@ class HostGroupUserGroupAssignView(CreateView):
         )
 
 class HostGroupUserGroupUnassignView(DeleteView):
+    """
+    Unassigns a hostgroup from an usergroup
+
+    **Context**
+
+    ``RequestContext``
+
+    ``hostgroup``
+        The hostgroup.
+
+    **Template:**
+
+    :template:`keys/hostgroup_usergroups_unassign_confirm.html`
+
+    """
 
     template_name = "keys/hostgroup_usergroups_unassign_confirm.html"
 

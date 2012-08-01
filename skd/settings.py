@@ -1,24 +1,8 @@
 # Django settings for skd project.
 
 """
-Don't change anything here. Create a new file "local_settings.py" and change
-the following values there:
-
-# Absolute path to the skd root
-
-PROJECT_DIR = "/my/path/to/skd"
-
-# Database-configuration
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'sqlite3',
-        'NAME': 'sshkeys.db'
-    }
-}
-
-(see below for database configuration)
-
+Don't change anything here. Copy the file "local_settings.py.dist" to
+"local_settings.py" and change the appropriate values there.
 """
 
 DEBUG = True

@@ -177,10 +177,8 @@ LOCALE_PATHS = (
     '%s/locale' % (PROJECT_DIR),
 )
 
-STATIC_ROOT = "%s/static" % (PROJECT_DIR)
-
 STATICFILES_DIRS = (
-    "%s/static.files" % (PROJECT_DIR),
+    "%s/static" % (PROJECT_DIR),
 )
 
 TEMPLATE_DIRS = (

@@ -1,6 +1,25 @@
 # Django settings for skd project.
 
-PROJECT_DIR = "/Users/ploeger/Documents/prog/skd"
+"""
+Don't change anything here. Create a new file "local_settings.py" and change
+the following values there:
+
+# Absolute path to the skd root
+
+PROJECT_DIR = "/my/path/to/skd"
+
+# Database-configuration
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'sqlite3',
+        'NAME': 'sshkeys.db'
+    }
+}
+
+(see below for database configuration)
+
+"""
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -13,12 +32,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'sshkeys.db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': '',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '',     # Or path to database file if using sqlite3.
+        'USER': '',     # Not used with sqlite3.
+        'PASSWORD': '', # Not used with sqlite3.
+        'HOST': '',     # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',     # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -35,9 +54,7 @@ TIME_ZONE = 'Europe/Berlin'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-LOCALE_PATHS = (
-    '%s/locale' % (PROJECT_DIR),
-)
+LOCALE_PATHS = ()
 
 SITE_ID = 1
 
@@ -65,7 +82,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = "%s/static" % (PROJECT_DIR)
+STATIC_ROOT = ""
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -76,7 +93,6 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "%s/static.files" % (PROJECT_DIR),
 )
 
 # List of finder classes that know how to find static files in
@@ -117,7 +133,6 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "%s/templates" % (PROJECT_DIR),
 )
 
 INSTALLED_APPS = (
@@ -162,6 +177,31 @@ LOGGING = {
         },
     }
 }
+
+# Read in local settings
+
+try:
+    from local_settings import *
+except ImportError, e:
+    print 'Unable to load local_settings.py:', e
+
+# Apply settings after reading local settings
+
+# Paths fitted for distribution
+
+LOCALE_PATHS = (
+    '%s/locale' % (PROJECT_DIR),
+)
+
+STATIC_ROOT = "%s/static" % (PROJECT_DIR)
+
+STATICFILES_DIRS = (
+    "%s/static.files" % (PROJECT_DIR),
+)
+
+TEMPLATE_DIRS = (
+    "%s/templates" % (PROJECT_DIR),
+)
 
 # Authentication settings
 

@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block menu %}
+    {% with "hostgroups" as current_category %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block header %}
+    <a href="{% url hostgroups_list %}">{% trans "Hostgroups"%}</a>
+    >>
+    <a href="{% url hostgroups_hosts_list hostgroup=hostgroup.id %}">{% trans "Members" %}</a>
+    >>
+    {% trans "Assign" %}
+{% endblock header %}
+
+{% block content %}
+
+<span class="error">{{ form.non_field_errors }}</span>
+
+<form action="" method="post">
+    {% csrf_token %}
+    <div>
+        {{ form.group.label_tag }}
+        {{ hostgroup }}
+        <input type="hidden" name="{{ form.group.html_name }}"
+               value="{{ form.group.value }}" />
+    </div>
+    <div>
+        {{ form.host.label_tag }}
+        {{ form.host }}
+        <span class="error">{{ form.host.errors }}</span>
+    </div>
+    <br />
+    <div>
+        <input id="submit_action" type="submit" value="{% trans "Submit" %}"/>
+        <input id="cancel_action" type="button" value="{% trans "Cancel" %}"
+               onclick="window.history.back()" />
+    </div>
+</form>
+
+{% endblock content %}

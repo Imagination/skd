@@ -1,0 +1,51 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block menu %}
+    {% with "hostgroups" as current_category %}
+    {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block header %}
+    <a href="{% url hostgroups_list %}">{% trans "Hostgroups"%}</a>
+    >> {% trans "Members" %}
+{% endblock header %}
+
+{% block content %}
+{% if hostgroup_hosts %}
+    <div class="datagrid">
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Member" %}</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for host in hostgroup_hosts %}
+            <tr title="{{ host.host.comment }}">
+                <td>
+                    {{ host.host.name }}
+                </td>
+                <td>
+                    <a href="{% url hostgroups_hosts_unassign hostgroup=hostgroup.id pk=host.id %}">
+                       {% trans "Unassign" %}
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+{% else %}
+    <p>{% trans "This hostgroup has no members." %}</p>
+{% endif %}
+
+<p><a href="{% url hostgroups_hosts_assign hostgroup.id %}">{% trans "Assign a member" %}</a></p>
+
+{% endblock content %}

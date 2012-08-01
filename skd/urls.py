@@ -3,10 +3,11 @@ from django.conf.urls import patterns, include, url
 # Uncomment the next two lines to enable the admin:
 #from django.contrib import admin
 #admin.autodiscover()
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django.views.generic.list import ListView
-from keys.models import User, Host, UserGroup
-from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, UserKeyDeleteView, UserGroupListView, UserGroupAssignView, UserGroupUnassignView, UserGroupUserListView
+from keys.models import User, Host, UserGroup, HostGroup
+from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, UserKeyDeleteView, UserGroupListView, UserGroupAssignView, UserGroupUnassignView, UserGroupUserListView, UserGroupUserAssignView, UserGroupUserUnassignView, HostGroupUnassignView, HostGroupAssignView, HostGroupListView, HostGroupHostListView, HostGroupHostAssignView, HostGroupHostUnassignView, UserGroupHostGroupListView, UserGroupHostGroupAssignView, UserGroupHostGroupUnassignView, HostGroupUserGroupListView, HostGroupUserGroupAssignView, HostGroupUserGroupUnassignView
 
 urlpatterns = patterns('keys.views',
 
@@ -14,7 +15,9 @@ urlpatterns = patterns('keys.views',
 
     url(
         r"^$",
-        "home",
+        TemplateView.as_view(
+            template_name="keys/home.html"
+        ),
         name = "home"
     ),
 
@@ -98,7 +101,7 @@ urlpatterns = patterns('keys.views',
         name = "users_groups_unassign"
     ),
 
-    # User-Group management
+    # Usergroup management
 
     url(
         r"^usergroups/list$",
@@ -142,10 +145,40 @@ urlpatterns = patterns('keys.views',
         name = "usergroups_users_list"
     ),
 
+    url(
+        r"^usergroups/users/(?P<usergroup>.*)/assign$",
+        UserGroupUserAssignView.as_view(),
+        name = "usergroups_users_assign"
+    ),
+
+    url(
+        r"^usergroups/users/(?P<usergroup>.*)/unassign/(?P<pk>.*)$",
+        UserGroupUserUnassignView.as_view(),
+        name = "usergroups_users_unassign"
+    ),
+
+    url(
+        "^usergroups/hostgroups/(?P<usergroup>.*)/list$",
+        UserGroupHostGroupListView.as_view(),
+        name = "usergroups_hostgroups_list"
+    ),
+
+    url(
+        "^usergroups/hostgroups/(?P<usergroup>.*)/assign$",
+        UserGroupHostGroupAssignView.as_view(),
+        name = "usergroups_hostgroups_assign"
+    ),
+
+    url(
+        "^usergroups/hostgroups/(?P<usergroup>.*)/unassign/(?P<pk>.*)$",
+        UserGroupHostGroupUnassignView.as_view(),
+        name = "usergroups_hostgroups_unassign"
+    ),
+
     # Host management
 
     url(
-        r'^hosts/list$',
+        r"^hosts/list$",
         ListView.as_view(
             queryset = Host.objects.all(),
             context_object_name = "hosts"
@@ -154,13 +187,124 @@ urlpatterns = patterns('keys.views',
     ),
 
     url(
-        r'^hosts/create$',
+        r"^hosts/create$",
         CreateView.as_view(
             model = Host,
             success_url = "/hosts/list"
         ),
         name = "hosts_create"
-    )
+    ),
+
+    url(
+        r"^hosts/edit/(?P<pk>.*)$",
+        UpdateView.as_view(
+            model = Host,
+            success_url = "/hosts/list"
+        ),
+        name = "hosts_edit"
+    ),
+
+    url(
+        r"^hosts/delete/(?P<pk>.*)$",
+        DeleteView.as_view(
+            model = Host,
+            success_url = "/hosts/list"
+        ),
+        name = "hosts_delete"
+    ),
+
+    url(
+        r"^hosts/groups/(?P<host>.*)/list$",
+        HostGroupListView.as_view(),
+        name = "hosts_groups_list"
+    ),
+
+    url(
+        r"^hosts/groups/(?P<host>.*)/assign$",
+        HostGroupAssignView.as_view(),
+        name = "hosts_groups_assign"
+    ),
+
+    url(
+        r"^hosts/groups/(?P<host>.*)/unassign/(?P<pk>.*)$",
+        HostGroupUnassignView.as_view(),
+        name = "hosts_groups_unassign"
+    ),
+
+    # Hostgroup management
+
+    url(
+        r"^hostgroups/list$",
+        ListView.as_view(
+            queryset = HostGroup.objects.all(),
+            context_object_name = "hostgroups"
+        ),
+        name = "hostgroups_list"
+    ),
+
+    url(
+        r"^hostgroups/create$",
+        CreateView.as_view(
+            model = HostGroup,
+            success_url = "/hostgroups/list"
+        ),
+        name = "hostgroups_create"
+    ),
+
+    url(
+        r"^hostgroups/edit/(?P<pk>.*)$",
+        UpdateView.as_view(
+            model = HostGroup,
+            success_url = "/hostgroups/list"
+        ),
+        name = "hostgroups_edit"
+    ),
+
+    url(
+        r"^hostgroups/delete/(?P<pk>.*)$",
+        DeleteView.as_view(
+            model = HostGroup,
+            success_url = "/hostgroups/list"
+        ),
+        name = "hostgroups_delete"
+    ),
+
+    url(
+        r"^hostgroups/hosts/(?P<hostgroup>.*)/list$",
+        HostGroupHostListView.as_view(),
+        name = "hostgroups_hosts_list"
+    ),
+
+    url(
+        r"^hostgroups/hosts/(?P<hostgroup>.*)/assign$",
+        HostGroupHostAssignView.as_view(),
+        name = "hostgroups_hosts_assign"
+    ),
+
+    url(
+        r"^hostgroups/hosts/(?P<hostgroup>.*)/unassign/(?P<pk>.*)$",
+        HostGroupHostUnassignView.as_view(),
+        name = "hostgroups_hosts_unassign"
+    ),
+
+    url(
+        r"^hostgroups/usergroups/(?P<hostgroup>.*)/list$",
+        HostGroupUserGroupListView.as_view(),
+        name = "hostgroups_usergroups_list"
+    ),
+
+    url(
+        r"^hostgroups/usergroups/(?P<hostgroup>.*)/assign$",
+        HostGroupUserGroupAssignView.as_view(),
+        name = "hostgroups_usergroups_assign"
+    ),
+
+    url(
+        r"^hostgroups/usergroups/(?P<hostgroup>.*)/unassign/(?P<pk>.*)$",
+        HostGroupUserGroupUnassignView.as_view(),
+        name = "hostgroups_usergroups_unassign"
+    ),
+    
 
     #url(r'^hosts/list$', 'list_hosts', name='list_hosts'),
     #url(r'^apply$', 'apply', name='apply')

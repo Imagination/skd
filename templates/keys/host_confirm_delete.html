@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block menu %}
+    {% with "hosts" as current_category %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block header %}
+    <a href="{% url hosts_list %}">{% trans "Hosts"%}</a>
+    >>
+    {% trans "Delete" %}
+
+{% endblock header %}
+
+{% block content %}
+
+<form action="" method="post">
+{% csrf_token %}
+
+<p>
+{% blocktrans %}
+Do you really want to delete the following host:
+{% endblocktrans %}
+</p>
+
+<table>
+    <tr>
+        <th>{% trans "Name" %}</th>
+        <td>{{ object.name }}</td>
+    </tr>
+    <tr>
+        <th>{% trans "FQDN" %}</th>
+        <td>{{ object.fqdn }}</td>
+    </tr>
+    <tr>
+        <th colspan="2">{% trans "Comment" %}</th>
+    </tr>
+    <tr>
+        <td colspan="2">{{ object.comment }}</td>
+    </tr>
+</table>
+
+<p><input type="submit" value="{% trans 'Yes' %}"/> <input type="button" value="{% trans 'No' %}" onclick="history.back()"/></p>
+</form>
+
+{% endblock content %}

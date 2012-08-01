@@ -12,7 +12,7 @@
 {% endblock header %}
 
 {% block content %}
-{% if users %}
+{% if hosts %}
     <div class="datagrid">
         <table>
             <thead>
@@ -39,7 +39,7 @@
                     </a>
                 </td>
                 <td>
-                    <a href="{% url hosts_group_list host=host.id %}">
+                    <a href="{% url hosts_groups_list host=host.id %}">
                         {% trans "Groups" %}
                     </a>
                 </td>

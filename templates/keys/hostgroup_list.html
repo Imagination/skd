@@ -2,17 +2,17 @@
 {% load i18n %}
 
 {% block menu %}
-    {% with "usergroups" as current_category %}
+    {% with "hostgroups" as current_category %}
     {{ block.super }}
     {% endwith %}
 {% endblock %}
 
 {% block header %}
-{% trans "Usergroups" %}
+{% trans "Hostgroups" %}
 {% endblock header %}
 
 {% block content %}
-{% if usergroups %}
+{% if hostgroups %}
     <div class="datagrid">
         <table>
             <thead>
@@ -24,26 +24,26 @@
 
             <tbody>
 
-            {% for usergroup in usergroups %}
-            <tr title="{{ usergroup.comment }}">
+            {% for hostgroup in hostgroups %}
+            <tr title="{{ hostgroup.comment }}">
                 <td>
-                    <a href="{% url usergroups_edit pk=usergroup.id %}">
-                        {{ usergroup.name }}
+                    <a href="{% url hostgroups_edit pk=hostgroup.id %}">
+                        {{ hostgroup.name }}
                     </a>
                 </td>
                 <td>
-                    <a href="{% url usergroups_delete pk=usergroup.id %}">
+                    <a href="{% url hostgroups_delete pk=hostgroup.id %}">
                         {% trans "Delete" %}
                     </a>
                 </td>
                 <td>
-                    <a href="{% url usergroups_users_list usergroup=usergroup.id %}">
-                        {% trans "Members" %}
+                    <a href="{% url hostgroups_hosts_list hostgroup=hostgroup.id %}">
+                       {% trans "Members" %}
                     </a>
                 </td>
                 <td>
-                    <a href="{% url usergroups_hostgroups_list usergroup=usergroup.id %}">
-                        {% trans "Assigned hostgroups" %}
+                    <a href="{% url hostgroups_usergroups_list hostgroup=hostgroup.id %}">
+                        {% trans "Assigned usergroups" %}
                     </a>
                 </td>
             </tr>
@@ -54,9 +54,9 @@
         </table>
     </div>
 {% else %}
-    <p>{% trans "No usergroups exist." %}</p>
+    <p>{% trans "No hostgroups exist." %}</p>
 {% endif %}
 
-<p><a href="{% url usergroups_create %}">{% trans "Create usergroup" %}</a></p>
+<p><a href="{% url hostgroups_create %}">{% trans "Create hostgroup" %}</a></p>
 
 {% endblock content %}

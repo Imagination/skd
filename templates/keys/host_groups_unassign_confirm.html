@@ -1,0 +1,32 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block menu %}
+    {% with "hosts" as current_category %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block header %}
+    <a href="{% url hosts_list %}">{% trans "hosts"%}</a>
+    >>
+    <a href="{% url hosts_groups_list host=group_member.id %}">{% trans "Groups" %}</a>
+    >>
+    {% trans "Unassign" %}
+{% endblock header %}
+
+{% block content %}
+
+<form action="" method="post">
+{% csrf_token %}
+
+<p>
+{% blocktrans with member=group_member.name group=object.group.name %}
+Do you really want to remove the host {{ member }} from group {{ group }}?
+{% endblocktrans %}
+</p>
+
+<p><input type="submit" value="{% trans 'Yes' %}"/> <input type="button" value="{% trans 'No' %}" onclick="history.back()"/></p>
+</form>
+
+{% endblock content %}

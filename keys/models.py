@@ -1,6 +1,10 @@
 from django.db import models
 import django.contrib.auth.models
 
+# Models
+from django.db.models.signals import post_save
+from django.dispatch.dispatcher import receiver
+
 class User(models.Model):
     """
     Stores a SSH-user record
@@ -80,13 +84,15 @@ class Host(models.Model):
     SSH-aware hosts.
     """
 
-    name = models.CharField(max_length = 200, blank=False)
-    fqdn = models.CharField(max_length = 200, blank=False)
+    name = models.CharField(max_length = 200, blank = False)
+    fqdn = models.CharField(max_length = 200, blank = False)
+    user = models.CharField(max_length = 200, blank = False)
     comment = models.TextField(blank=True)
 
     class Meta:
         permissions = (
             ("list_hosts", "Can list all hosts"),
+            ("setup_host", "Write skd public key to host")
         )
 
     def __unicode__(self):
@@ -156,14 +162,18 @@ class ActionLog(models.Model):
     Logs changes in the UI, that are applied to the system when the
     user clicks "Apply".
 
+    The important changes are assignments and unassignments of hostgroups,
+    usergroups and hostgroup<>usergroups. That's when keys have to be
+    granted or revoked.
+
     Has a relation to :model:`auth.User`
     """
 
     timestamp = models.DateTimeField(null = False)
     user = models.ForeignKey(django.contrib.auth.models.User)
-    object = models.CharField(max_length = 100, blank = False)
-    objectid = models.IntegerField(null = False)
     action = models.CharField(max_length = 100, blank = False)
+    groupid = models.IntegerField(null = False)
+    memberid = models.IntegerField(null = False)
     comment = models.TextField(blank = True)
 
     class Meta:
@@ -173,3 +183,16 @@ class ActionLog(models.Model):
                 "The user can apply the action log"
             ),
         )
+
+class Configuration(models.Model):
+    """
+    Internal configuration of skd.
+
+    Currently available keys:
+
+    ssh_key_private: Private SSH-Key blob in base64
+    ssh_key_public: Public SSH-Key blob in base64
+    """
+
+    key = models.CharField(max_length = 100, blank = False, unique = True)
+    value = models.TextField(blank = True)

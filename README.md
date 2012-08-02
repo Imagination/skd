@@ -4,13 +4,15 @@ skd
 [s]IMPLE [k]EY [d]ISTRIBUTION
 
 Based on [django](https://www.djangoproject.com) and
-[HTML 5 boilerplate](http://html5boilerplate.com).
+[HTML 5 boilerplate](http://html5boilerplate.com). Requires
+[Paramiko](http://www.lag.net/paramiko/).
 
 Requirements
 ------------
 
   * Python >= 2.5
   * Django >= 1.4
+  * Paramiko >= 1.7.7.2
 
 Installation
 ------------

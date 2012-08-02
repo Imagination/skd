@@ -1,0 +1,67 @@
+{% extends "index.html" %}
+{% load i18n %}
+
+{% block header %}
+    {% trans "Setup" %}
+{% endblock %}
+
+{% block menu %}
+    {% with "home" as current_category %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
+{% block content %}
+
+    {% blocktrans %}
+    <p>Welcome to <strong>skd</strong>, the simple SSH public key distribution
+    software.</p>
+
+    <p>This form enables you to set up the basic configuration of
+    <strong>skd</strong>.</p>
+    {% endblocktrans %}
+
+    <form action="" method="post">
+    {% csrf_token %}
+
+    <fieldset>
+        <legend>{% trans "SSH-Keypair" %}</legend>
+
+        {% if sshkey_public %}
+            {% blocktrans with key=sshkey_public.value %}
+            <p>
+                The following public key was created:
+            </p>
+            <p>
+            <textarea cols="64" rows="11" onclick="select_all('public_key')"
+                      id="public_key">ssh-dss {{ key }}</textarea>
+            </p>
+            <p>
+                Put that key in the authorized_keys-file of every managed
+                host.
+            </p>
+            {% endblocktrans %}
+            <input type="submit" value="{% trans "Generate new key" %}"
+                   name="sshkey_generate" />
+        {% else %}
+            <p>{% trans "There are no SSH-Keys generated yet." %}</p>
+            <input type="submit" value="{% trans "Generate" %}"
+                   name="sshkey_generate" />
+        {% endif %}
+
+    </fieldset>
+
+    </form>
+
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+    function select_all(objectId)
+    {
+        object = $("#" + objectId);
+        object.focus();
+        object.select();
+    }
+</script>
+{% endblock scripts %}

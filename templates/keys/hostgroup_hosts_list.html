@@ -19,6 +19,8 @@
             <thead>
                 <tr>
                     <th>{% trans "Member" %}</th>
+                    <th>{% trans "FQDN" %}</th>
+                    <th>{% trans "User" %}</th>
                     <th>&nbsp;</th>
                 </tr>
             </thead>
@@ -29,6 +31,12 @@
             <tr title="{{ host.host.comment }}">
                 <td>
                     {{ host.host.name }}
+                </td>
+                <td>
+                    {{ host.host.fqdn }}
+                </td>
+                <td>
+                    {{ host.host.user }}
                 </td>
                 <td>
                     <a href="{% url hostgroups_hosts_unassign hostgroup=hostgroup.id pk=host.id %}">

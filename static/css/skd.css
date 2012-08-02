@@ -21,7 +21,6 @@ div#userinfo {
 
 div#border {
     margin: 1em;
-    text-align: justify;
     padding: 1em;
     background: #ffffff;
     border: 1px solid #000000;
@@ -66,6 +65,7 @@ div#menu ul li.currentMenu {
 div#main {
 
     padding-left: 16em;
+    text-align: justify;
 
 }
 
@@ -85,6 +85,21 @@ footer {
     font-size: 0.6em;
 
     text-align: center;
+
+}
+
+fieldset {
+
+    border: 1px solid black;
+    padding: 1em;
+    padding-top: 0px;
+
+}
+
+fieldset legend {
+
+    padding-left: 0.5em;
+    padding-right: 0.5em;
 
 }
 

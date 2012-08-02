@@ -1,10 +1,6 @@
 from django.db import models
 import django.contrib.auth.models
 
-# Models
-from django.db.models.signals import post_save
-from django.dispatch.dispatcher import receiver
-
 class User(models.Model):
     """
     Stores a SSH-user record

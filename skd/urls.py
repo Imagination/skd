@@ -1,16 +1,24 @@
 import django
 from django.conf.urls import patterns, include, url
 
-# Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-
+from django.contrib.auth.decorators import login_required, \
+    permission_required, user_passes_test
 admin.autodiscover()
+
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django.views.generic.list import ListView
 from keys.models import User, Host, UserGroup, HostGroup
-from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, UserKeyDeleteView, UserGroupListView, UserGroupAssignView, UserGroupUnassignView, UserGroupUserListView, UserGroupUserAssignView, UserGroupUserUnassignView, HostGroupUnassignView, HostGroupAssignView, HostGroupListView, HostGroupHostListView, HostGroupHostAssignView, HostGroupHostUnassignView, UserGroupHostGroupListView, UserGroupHostGroupAssignView, UserGroupHostGroupUnassignView, HostGroupUserGroupListView, HostGroupUserGroupAssignView, HostGroupUserGroupUnassignView, SetupView, HostSetupView
+from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, \
+    UserKeyDeleteView, UserGroupListView, UserGroupAssignView, \
+    UserGroupUnassignView, UserGroupUserListView, UserGroupUserAssignView, \
+    UserGroupUserUnassignView, HostGroupUnassignView, HostGroupAssignView, \
+    HostGroupListView, HostGroupHostListView, HostGroupHostAssignView, \
+    HostGroupHostUnassignView, UserGroupHostGroupListView, \
+    UserGroupHostGroupAssignView, UserGroupHostGroupUnassignView, \
+    HostGroupUserGroupListView, HostGroupUserGroupAssignView, \
+    HostGroupUserGroupUnassignView, SetupView, HostSetupView
 
 
 urlpatterns = patterns('keys.views',

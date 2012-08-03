@@ -18,7 +18,7 @@ from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, \
     HostGroupHostUnassignView, UserGroupHostGroupListView, \
     UserGroupHostGroupAssignView, UserGroupHostGroupUnassignView, \
     HostGroupUserGroupListView, HostGroupUserGroupAssignView, \
-    HostGroupUserGroupUnassignView, SetupView, HostSetupView
+    HostGroupUserGroupUnassignView, SetupView, HostSetupView, ApplyView
 
 
 urlpatterns = patterns('keys.views',
@@ -413,7 +413,11 @@ urlpatterns = patterns('keys.views',
         name = "hostgroups_usergroups_unassign"
     ),
 
-    #url(r'^apply$', 'apply', name='apply')
+    url(
+        r"^apply$",
+        ApplyView.as_view(),
+        name = "apply"
+    )
 
 )
 

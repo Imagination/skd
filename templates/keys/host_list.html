@@ -29,14 +29,14 @@
             {% for host in hosts %}
             <tr title="{{ host.comment }}">
                 <td>
-                    <a href="{% url hosts_edit pk=user.id %}">
+                    <a href="{% url hosts_edit pk=host.id %}">
                         {{ host.name }}
                     </a>
                 </td>
                 <td>{{ host.fqdn }}</td>
                 <td>{{ host.user }}</td>
                 <td>
-                    <a href="{% url hosts_delete pk=user.id %}">
+                    <a href="{% url hosts_delete pk=host.id %}">
                         {% trans "Delete" %}
                     </a>
                 </td>

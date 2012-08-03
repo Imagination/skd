@@ -100,7 +100,7 @@ class HostGroup(models.Model):
     """
 
     name = models.CharField(max_length = 200, blank=False)
-    comment = models.TextField()
+    comment = models.TextField(blank = True)
 
     class Meta:
         permissions = (

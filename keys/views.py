@@ -1,5 +1,6 @@
 import StringIO
 from datetime import datetime
+from sets import Set
 import socket
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -11,11 +12,233 @@ from django.views.generic.list import ListView
 
 from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.dsskey import DSSKey
+from paramiko.pkey import PKey
 from paramiko.ssh_exception import AuthenticationException, SSHException
 import sys
 from keys.models import User,Key, UserGroup, UserInGroup, HostInGroup, Host, \
     HostGroup, UserGroupInHostGroup, Configuration, ActionLog
 from django.utils.translation import ugettext as _
+
+# Apply-View
+
+class ApplyView(TemplateView):
+    """
+    Applies the current configuration and delivers the authorized_keys-files.
+
+    **Template:**
+
+    :template:`keys/apply.html`
+
+    """
+
+    template_name = "keys/apply.html"
+
+    mode = "index"
+
+    affected_hosts = Set()
+
+    ssh_messages = []
+
+    def get_context_data(self, **kwargs):
+        context = super(ApplyView, self).get_context_data(**kwargs)
+
+        context["mode"] = self.mode
+
+        if len(self.affected_hosts) > 0:
+            context["affected_hosts"] = Host.objects.filter(
+                id__in = self.affected_hosts
+            )
+
+        if len(self.ssh_messages) > 0:
+            context["log_output"] = "\n".join(self.ssh_messages)
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        if "do_scan" in request.POST:
+
+            self.affected_hosts = Set()
+            self.mode = "scanned"
+
+            scan_timestamp = datetime.now()
+
+            # Check the ActionLog and analyze pending changes.
+
+            for line in ActionLog.objects.filter(
+                timestamp__lte = scan_timestamp
+            ).order_by("timestamp"):
+
+                if line.action == "UNASSIGN_HOSTINGROUP" or\
+                   line.action == "ASSIGN_HOSTINGROUP":
+
+                    # A host has been added to or removed from a hostgroup
+
+                    self.affected_hosts.add(line.memberid)
+
+                elif line.action == "UNASSIGN_USERINGROUP" or\
+                    line.action == "ASSIGN_USERINGROUP":
+
+                    # A user has been assigned to or removed from a usergroup
+
+                    # Find all hosts for this usergroup
+
+                    affected_mastergroups =\
+                        UserGroupInHostGroup.objects.filter(
+                        usergroup__id = line.groupid
+                    )
+
+                    for hostgroup in affected_mastergroups:
+
+                        affected_hosts = Host.objects.filter(
+                            hostingroup__group__id = hostgroup.id
+                        )
+
+                        for host in affected_hosts:
+                            self.affected_hosts.add(host.id)
+
+                elif line.action == "UNASSIGN_USERGROUPINHOSTGROUP" or\
+                    line.action == "ASSIGN_USERGROUPINHOSTGROUP":
+
+                    # A usergroup has been removed from a hostgroup or vice
+                    # versa
+
+                    affected_hosts = Host.objects.filter(
+                        hostingroup__group__id = line.groupid
+                    )
+
+                    for host in affected_hosts:
+                        self.affected_hosts.add(host.id)
+
+                request.session["affected_hosts"] = self.affected_hosts
+                request.session["scan_timestamp"] = scan_timestamp
+
+        elif "do_apply" in request.POST:
+
+            self.mode = "done"
+
+            self.affected_hosts = request.session["affected_hosts"]
+
+            public_key = Configuration.objects.get(
+                key = "sshkey_public"
+            )
+
+            private_key_config = Configuration.objects.get(
+                key = "sshkey_private"
+            )
+
+            private_key_file = StringIO.StringIO(str(private_key_config.value))
+
+            private_key = DSSKey.from_private_key(private_key_file)
+
+            private_key_file.close()
+
+            affected_host_objects = Host.objects.filter(
+                id__in = self.affected_hosts
+            )
+
+            self.ssh_messages = []
+
+            for host in affected_host_objects:
+
+                # Find all users, that have access to this host.
+
+                authorized_keys = Set()
+
+                user_keys = Key.objects.filter(
+                    user__useringroup__group__usergroupinhostgroup__hostgroup__hostingroup__host__id =
+                    host.id
+                )
+
+                for key in user_keys:
+                    authorized_keys.add(key.key)
+
+                # Add our own public key to the keys
+
+                authorized_keys.add("ssh-dss %s skd" % (public_key.value))
+
+                # Generate the authorized_keys file onto the server.
+
+                client = SSHClient()
+                client.load_system_host_keys()
+                client.set_missing_host_key_policy(AutoAddPolicy)
+
+                is_connected = False
+
+                try:
+
+                    client.connect(
+                        hostname = str(host.fqdn),
+                        username = str(host.user),
+                        pkey = private_key
+                    )
+
+                    is_connected = True
+
+                except AuthenticationException:
+
+                    self.ssh_messages.append(_(
+                        "Cannot connect to host %(name)s as user %(user)s. "
+                        "Perhaps the skd-key hasn't  been added to it's "
+                        "authorized_keys-file" %
+                        {
+                            "name": host.name,
+                            "user": host.user
+                        }
+                    ))
+
+                except SSHException, socket.error:
+
+                    self.ssh_messages.append(_(
+                        "System failure connecting to SSH host %(host)s as "
+                        "user %(user)s: %(error)s" %
+                        {
+                            "error": sys.exc_info()[0],
+                            "host": host.name,
+                            "user": host.user
+                        }
+                    ))
+
+                if is_connected:
+
+                    try:
+
+                        command = 'echo -e "%s" > ~/'\
+                                  '.ssh/authorized_keys' %\
+                                  (
+                                      "\n".join(authorized_keys)
+                                  )
+
+                        client.exec_command(command = command)
+
+                        self.ssh_messages.append(_(
+                            "Host %(host)s with user %(user)s completed." %
+                            {
+                                "host": host.name,
+                                "user": host.user
+                            }
+                        ))
+
+                    except:
+
+                        self.ssh_messages.append(_(
+                            "Error adding my public key to the "
+                            "authorized_keys-file of host %(host)s / user %"
+                            "(user)s: %(error)s" %\
+                            {
+                                "error": sys.exc_info()[0],
+                                "host": host.name,
+                                "user": user.name
+                            }
+                        ))
+
+            # Delete the action log up to the scan time
+
+            ActionLog.objects.filter(
+                timestamp__lte = request.session["scan_timestamp"]
+            ).delete()
+
+        return self.get(request, *args, **kwargs)
 
 # Setup-View
 
@@ -26,12 +249,11 @@ class SetupView(TemplateView):
 
     **Template:**
 
-    :template:`keys/setup.html
+    :template:`keys/setup.html`
 
     """
 
     template_name = "keys/setup.html"
-    sshkeys = []
 
     def get_context_data(self, **kwargs):
         context = super(SetupView, self).get_context_data(**kwargs)
@@ -150,7 +372,7 @@ class UserKeyCreateView(CreateView):
 
     def get_success_url(self):
         return reverse(
-            "user_keys_list",
+            "users_keys_list",
             kwargs = {
                 "user": self.key_owner.id
             }
@@ -225,7 +447,7 @@ class UserKeyDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse(
-            "user_keys_list",
+            "users_keys_list",
             kwargs = {
                 "user": self.key_owner.id
             }

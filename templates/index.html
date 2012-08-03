@@ -156,7 +156,15 @@ chromium.org/developers/how-tos/chrome-frame-getting-started -->
 
                     {% if perms.keys.can_apply %}
 
-                    <li>{% trans "Apply changes" %}</li>
+                    <li onclick="window.location='{% url apply %}'"
+                        {% if current_category == "apply" %}
+                            class="currentMenu"
+                        {% endif %}
+                    >
+
+                        {% trans "Apply changes" %}
+
+                    </li>
 
                     {% endif %}
 

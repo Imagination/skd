@@ -1,0 +1,5 @@
+TODO
+
+  * Add overriden views for all delete operations and add a line to the
+  ActionLog for them (deleting a user should resolve in deleting his keys
+  from all affected hosts)

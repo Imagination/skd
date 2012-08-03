@@ -303,6 +303,23 @@ class SetupView(TemplateView):
 
 # User views
 
+class UserDeleteView(DeleteView):
+    """
+    Delets a user.
+
+    **Context**
+
+    ``RequestContext`
+
+    **Template:**
+
+    :template:`keys/user_confirm_delete.html`
+
+    """
+
+    model = User
+    success_url = "/users/list"
+
 # User/Key
 
 class UserKeyListView(ListView):

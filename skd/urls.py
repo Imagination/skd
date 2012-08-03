@@ -18,7 +18,8 @@ from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, \
     HostGroupHostUnassignView, UserGroupHostGroupListView, \
     UserGroupHostGroupAssignView, UserGroupHostGroupUnassignView, \
     HostGroupUserGroupListView, HostGroupUserGroupAssignView, \
-    HostGroupUserGroupUnassignView, SetupView, HostSetupView, ApplyView
+    HostGroupUserGroupUnassignView, SetupView, HostSetupView, ApplyView, \
+    UserDeleteView
 
 
 urlpatterns = patterns('keys.views',
@@ -83,10 +84,7 @@ urlpatterns = patterns('keys.views',
     url(
         r'^users/delete/(?P<pk>.*)$',
         permission_required("keys.delete_user")(
-            DeleteView.as_view(
-                model = User,
-                success_url = "/users/list"
-            )
+            UserDeleteView.as_view()
         ),
         name = 'users_delete'
     ),

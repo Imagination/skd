@@ -1,6 +1,5 @@
 import StringIO
 from datetime import datetime
-from sets import Set
 import socket
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -12,7 +11,6 @@ from django.views.generic.list import ListView
 
 from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.dsskey import DSSKey
-from paramiko.pkey import PKey
 from paramiko.ssh_exception import AuthenticationException, SSHException
 import sys
 from keys.models import User,Key, UserGroup, UserInGroup, HostInGroup, Host, \
@@ -35,7 +33,7 @@ class ApplyView(TemplateView):
 
     mode = "index"
 
-    affected_hosts = Set()
+    affected_hosts = set()
 
     ssh_messages = []
 
@@ -58,7 +56,7 @@ class ApplyView(TemplateView):
 
         if "do_scan" in request.POST:
 
-            self.affected_hosts = Set()
+            self.affected_hosts = set()
             self.mode = "scanned"
 
             scan_timestamp = datetime.now()
@@ -143,7 +141,7 @@ class ApplyView(TemplateView):
 
                 # Find all users, that have access to this host.
 
-                authorized_keys = Set()
+                authorized_keys = set()
 
                 user_keys = Key.objects.filter(
                     user__useringroup__group__usergroupinhostgroup__hostgroup__hostingroup__host__id =
@@ -155,7 +153,7 @@ class ApplyView(TemplateView):
 
                 # Add our own public key to the keys
 
-                authorized_keys.add("ssh-dss %s skd" % (public_key.value))
+                authorized_keys.add("ssh-dss %s skd" % (public_key.value,))
 
                 # Generate the authorized_keys file onto the server.
 
@@ -219,16 +217,15 @@ class ApplyView(TemplateView):
                             }
                         ))
 
-                    except:
+                    except SSHException:
 
                         self.ssh_messages.append(_(
-                            "Error adding my public key to the "
-                            "authorized_keys-file of host %(host)s / user %"
-                            "(user)s: %(error)s" %\
+                            "Error deploying the authorized_keys-file of "
+                            "host %(host)s / user %(user)s: %(error)s" %\
                             {
                                 "error": sys.exc_info()[0],
                                 "host": host.name,
-                                "user": user.name
+                                "user": host.user
                             }
                         ))
 
@@ -1110,13 +1107,13 @@ class HostSetupView(TemplateView):
 
                     command = 'echo "ssh-dss %s skd" >> ~/' \
                         '.ssh/authorized_keys' % \
-                        ( sshkey_public.value )
+                        ( sshkey_public.value, )
 
                     client.exec_command(command = command)
 
                     self.ssh_message = _("Host is set up.")
 
-                except:
+                except SSHException:
 
                     self.ssh_message = _(
                         "Error adding my public key to the "

@@ -174,15 +174,15 @@ except ImportError, e:
 # Paths fitted for distribution
 
 LOCALE_PATHS = (
-    '%s/locale' % (PROJECT_DIR),
+    '%s/locale' % (PROJECT_DIR,),
 )
 
 STATICFILES_DIRS = (
-    "%s/static" % (PROJECT_DIR),
+    "%s/static" % (PROJECT_DIR,),
 )
 
 TEMPLATE_DIRS = (
-    "%s/templates" % (PROJECT_DIR),
+    "%s/templates" % (PROJECT_DIR,),
 )
 
 # Authentication settings

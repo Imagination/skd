@@ -130,7 +130,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    "keys"
+    'keys'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -188,3 +188,7 @@ TEMPLATE_DIRS = (
 # Authentication settings
 
 LOGIN_URL = "/login"
+
+# Maximum entries per page for ActionLog
+
+ACTIONS_MAX = 25

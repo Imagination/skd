@@ -168,6 +168,20 @@ chromium.org/developers/how-tos/chrome-frame-getting-started -->
 
                     {% endif %}
 
+                    {% if perms.keys.list_actionlog %}
+
+                    <li onclick="window.location='{% url actionlog_list %}'"
+                        {% if current_category == "actions" %}
+                            class="currentMenu"
+                        {% endif %}
+                    >
+
+                        {% trans "Actionlog" %}
+
+                    </li>
+
+                    {% endif %}
+
                 </ul>
 
             {% endblock menu %}

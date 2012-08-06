@@ -21,7 +21,8 @@ from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, \
     HostGroupUserGroupUnassignView, SetupView, HostSetupView, ApplyView, \
     UserDeleteView, HostDeleteView, UserGroupDeleteView, HostGroupDeleteView,\
     UserCreateView, UserGroupCreateView, HostCreateView, HostGroupCreateView,\
-    UserUpdateView, UserGroupUpdateView, HostUpdateView, HostGroupUpdateView
+    UserUpdateView, UserGroupUpdateView, HostUpdateView, HostGroupUpdateView,\
+    ListActionLogView, DeleteActionLogView
 
 
 urlpatterns = patterns('keys.views',
@@ -46,6 +47,24 @@ urlpatterns = patterns('keys.views',
             SetupView.as_view()
         ),
         name = "setup"
+    ),
+
+    # Action Log
+
+    url(
+        r"^actionlog$",
+        permission_required("keys.list_actionlog")(
+            ListActionLogView.as_view()
+        ),
+        name = "actionlog_list"
+    ),
+
+    url(
+        r"^actionlog/delete",
+        permission_required("keys.delete_actionlog")(
+            DeleteActionLogView.as_view()
+        ),
+        name = "actionlog_delete"
     ),
 
     # User management

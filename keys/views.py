@@ -1,9 +1,12 @@
 import StringIO
 from datetime import datetime
 import socket
+from django.contrib.auth.decorators import user_passes_test
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render_to_response, redirect
+from django.template.context import RequestContext
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, \
     ModelFormMixin
@@ -13,9 +16,60 @@ from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.dsskey import DSSKey
 from paramiko.ssh_exception import AuthenticationException, SSHException
 import sys
+from skd import settings
 from keys.models import User,Key, UserGroup, UserInGroup, HostInGroup, Host, \
     HostGroup, UserGroupInHostGroup, Configuration, ActionLog, ApplyLog
 from django.utils.translation import ugettext as _
+
+# Actions-List
+
+class ListActionLogView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+
+        actions_list = ActionLog.objects.order_by("-timestamp")
+
+        paginator = Paginator(actions_list, settings.ACTIONS_MAX)
+
+        page = request.GET.get("page")
+
+        try:
+            actions = paginator.page(page)
+
+        except PageNotAnInteger:
+            actions = paginator.page(1)
+
+        except EmptyPage:
+            actions = paginator.page(paginator.num_pages)
+
+        return render_to_response(
+            "keys/actionslist.html",
+            RequestContext(
+                request,
+                {
+                    "actions": actions
+                }
+            )
+        )
+
+class DeleteActionLogView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+
+        # Clean actionlog
+
+        ActionLog.objects.all().delete()
+
+        # Add note about that
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "DELETE_ACTIONLOG"
+        ).save()
+
+        return redirect("actionlog_list")
+
 
 # Apply-View
 
@@ -169,6 +223,14 @@ class ApplyView(TemplateView):
                                 "user": host.user
                             }
                         ))
+
+                        # Add note
+
+                        ActionLog(
+                            timestamp = datetime.now(),
+                            user = self.request.user,
+                            action = "APPLY"
+                        ).save()
 
                         # Delete host from apply-Log.
 
@@ -545,6 +607,7 @@ class UserKeyUpdateView(UpdateView):
             user = self.request.user,
             action = "UPDATE_KEY",
             objectid = self.object.id,
+            objectid2 = self.object.user.id,
             comment = _(
                 "Updated key of user %(user)s.\n"
                 "Original data:\n"
@@ -892,7 +955,13 @@ class UserGroupAssignView(CreateView):
             user = self.request.user,
             action = "ASSIGN_USERINGROUP",
             objectid = self.object.user.id,
-            objectid2 = self.object.group.id
+            comment = _(
+                "Assigned user %(user)s to usergroup %(usergroup)s" %
+                {
+                    "user": self.object.user.name,
+                    "usergroup": self.object.group.name
+                }
+            )
         ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
@@ -961,7 +1030,13 @@ class UserGroupUnassignView(DeleteView):
             user = self.request.user,
             action = "UNASSIGN_USERINGROUP",
             objectid = self.object.user.id,
-            objectid2 = self.object.group.id
+            comment = _(
+                "Removed user %(user)s from usergroup %(usergroup)s" %
+                {
+                    "user": self.object.user.name,
+                    "usergroup": self.object.group.name
+                }
+            )
         ).save()
 
         # Delete object
@@ -1778,7 +1853,13 @@ class HostGroupAssignView(CreateView):
             user = self.request.user,
             action = "ASSIGN_HOSTINGROUP",
             objectid = self.object.host.id,
-            objectid2 = self.object.group.id
+            comment = _(
+                "Assigned host %(user)s@%(host)s to group %(group)s" % {
+                    "user": self.object.host.user,
+                    "host": self.object.host.name,
+                    "group": self.object.group.name
+                }
+            )
         ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
@@ -1841,7 +1922,13 @@ class HostGroupUnassignView(DeleteView):
             user = self.request.user,
             action = "UNASSIGN_HOSTINGROUP",
             objectid = self.object.host.id,
-            objectid2 = self.object.group.id
+            comment = _(
+                "Removed host %(user)s@%(host)s from group %(group)s" % {
+                    "user": self.object.host.user,
+                    "host": self.object.host.name,
+                    "group": self.object.group.name
+                }
+            )
         ).save()
 
         # Delete object
@@ -2108,7 +2195,13 @@ class HostGroupUserGroupAssignView(CreateView):
             user = self.request.user,
             action = "ASSIGN_USERGROUPINHOSTGROUP",
             objectid = self.object.usergroup.id,
-            objectid2= self.object.hostgroup.id
+            comment = _(
+                "Assigned usergroup %(usergroup)s to hostgroup %(hostgroup)s" %
+                {
+                    "usergroup": self.object.usergroup.name,
+                    "hostgroup": self.object.hostgroup.name
+                }
+            )
         ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
@@ -2177,7 +2270,14 @@ class HostGroupUserGroupUnassignView(DeleteView):
             user = self.request.user,
             action = "UNASSIGN_USERGROUPINHOSTGROUP",
             objectid = self.object.usergroup.id,
-            objectid2 = self.object.hostgroup.id
+            comment = _(
+                "Removed association of usergroup %(usergroup)s with hostgroup"
+                " %(hostgroup)s" %
+                {
+                    "usergroup": self.object.usergroup.name,
+                    "hostgroup": self.object.hostgroup.name
+                }
+            )
         ).save()
 
         # Delete object

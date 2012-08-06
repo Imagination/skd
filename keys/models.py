@@ -167,6 +167,14 @@ class ActionLog(models.Model):
     objectid2 = models.IntegerField(null = True)
     comment = models.TextField(blank = True)
 
+    class Meta:
+        permissions = (
+            (
+                "list_actionlog",
+                "The user can see the action log."
+            ),
+        )
+
 class ApplyLog(models.Model):
     """
     Logs hosts, that are affected by changes in the UI.
@@ -179,7 +187,7 @@ class ApplyLog(models.Model):
         permissions = (
             (
                 "can_apply",
-                "The user can apply the action log"
+                "The user can apply key-deployment"
                 ),
             )
 

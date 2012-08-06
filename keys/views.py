@@ -336,6 +336,59 @@ class UserCreateView(CreateView):
 
         return super(ModelFormMixin, self).form_valid(form)
 
+class UserUpdateView(UpdateView):
+    """
+    Updates a user.
+
+    **Context**
+
+    ``RequestContext``
+
+    **Template:**
+
+    :template:`keys/user_form.html`
+    """
+
+    model = User
+    success_url = "/users/list"
+
+    def form_valid(self, form):
+
+        # Log Update
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UPDATE_USER",
+            objectid = self.object.id,
+            comment = _(
+                "Updated user:\n"
+                "Original data: \n"
+                "%(name)s (%(fullname)s)\n"
+                "%(comment)s\n"
+                "\n"
+                "New data: \n"
+                "%(newname)s (%(newfullname)s)\n"
+                "%(newcomment)s\n"
+                % {
+                    "name": self.object.name,
+                    "fullname": self.object.fullname,
+                    "comment": self.object.comment,
+                    "newname": form.name,
+                    "newfullname": form.fullname,
+                    "newcomment": form.comment
+                }
+            )
+        ).save()
+
+        # Save object
+
+        self.object = form.save()
+
+        return super(ModelFormMixin, self).form_valid(form)
+
+
+
 class UserDeleteView(DeleteView):
     """
     Deletes a user.
@@ -532,6 +585,54 @@ class UserKeyUpdateView(UpdateView):
             }
         )
 
+    def form_valid(self, form):
+
+        # Log Update
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UPDATE_KEY",
+            objectid = self.object.id,
+            comment = _(
+                "Updated key of user %(user)s.\n"
+                "Original data:\n"
+                "Name: %(name)s\n"
+                "Key: %(key)s\n"
+                "%(comment)s\n"
+                "\n"
+                "New data:\n"
+                "Name: %(newname)s\n"
+                "Key: %(newkey)s\n"
+                "%(newcomment)s\n"
+                % {
+                    "name": self.object.name,
+                    "key": self.object.key,
+                    "comment": self.object.comment,
+                    "newname": form.name,
+                    "newkey": form.key,
+                    "newcomment": form.comment
+                }
+            )
+        ).save()
+
+        # Save object
+
+        self.object = form.save()
+
+        # Log affected hosts
+
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__user__id =
+            self.object.user.id
+        )
+
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
+
+        return super(ModelFormMixin, self).form_valid(form)
+
 class UserKeyDeleteView(DeleteView):
     """
     Removes an existing key for a user.
@@ -642,6 +743,53 @@ class UserGroupCreateView(CreateView):
 
         return super(ModelFormMixin, self).form_valid(form)
 
+class UserGroupUpdateView(UpdateView):
+    """
+    Updates a usergroup.
+
+    **Context**
+
+    ``RequestContext``
+
+    **Template:**
+
+    :template:`keys/usergroup_form.html`
+    """
+
+    model = UserGroup
+    success_url = "/usergroups/list"
+
+    def form_valid(self, form):
+
+        # Log Update
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UPDATE_USERGROUP",
+            objectid = self.object.id,
+            comment = _(
+                "Updated usergroup.\n"
+                "Original data:\n"
+                "Name: %(name)s\n"
+                "%(comment)s\n"
+                "New data:\n"
+                "Name: %(newname)s\n"
+                "%(newcomment)s\n"
+                % {
+                    "name": self.object.name,
+                    "comment": self.object.comment,
+                    "newname": form.name,
+                    "newcomment": form.comment
+                }
+            )
+        ).save()
+
+        # Save object
+
+        self.object = form.save()
+
+        return super(ModelFormMixin, self).form_valid(form)
 
 class UserGroupDeleteView(DeleteView):
     """
@@ -1253,6 +1401,68 @@ class HostCreateView(CreateView):
 
         return super(ModelFormMixin, self).form_valid(form)
 
+class HostUpdateView(UpdateView):
+    """
+    Updates a host.
+
+    **Context**
+
+    ``RequestContext``
+
+    **Template:**
+
+    :template:`keys/host_form.html`
+    """
+
+    model = Host
+    success_url = "/hosts/list"
+
+    def form_valid(self, form):
+
+        # Log Update
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UPDATE_HOST",
+            objectid = self.object.id,
+            comment = _(
+                "Updated host.\n"
+                "Original data:\n"
+                "Name: %(name)s\n"
+                "FQDN: %(fqdn)s\n"
+                "User: %(user)s\n"
+                "%(comment)s\n"
+                "\n"
+                "New data:\n"
+                "Name: %(newname)s\n"
+                "FQDN: %(newfqdn)s\n"
+                "User: %(newuser)s\n"
+                "%(comment)s"
+                % {
+                    "name": self.object.name,
+                    "fqdn": self.object.fqdn,
+                    "user": self.object.user,
+                    "comment": self.object.comment,
+                    "newname": form.name,
+                    "newfqdn": form.fqdn,
+                    "newuser": form.user,
+                    "newcomment": form.comment
+                }
+            )
+        ).save()
+
+        # Save object
+
+        self.object = form.save()
+
+        # Log affected host
+
+        if not ApplyLog.objects.filter(host = self.object).exists():
+            ApplyLog(host = self.object).save()
+
+        return super(ModelFormMixin, self).form_valid(form)
+
 class HostDeleteView(DeleteView):
     """
     Deletes a host.
@@ -1393,7 +1603,7 @@ class HostSetupView(TemplateView):
 
 class HostGroupCreateView(CreateView):
     """
-    Creates a host.
+    Creates a hostgroup.
 
     **Context**
 
@@ -1421,6 +1631,55 @@ class HostGroupCreateView(CreateView):
             action = "CREATE_HOSTGROUP",
             objectid = self.object.id
         ).save()
+
+        return super(ModelFormMixin, self).form_valid(form)
+
+class HostGroupUpdateView(UpdateView):
+    """
+    Update a hostgroup.
+
+    **Context**
+
+    ``RequestContext``
+
+    **Template:**
+
+    :template:`keys/host_form.html`
+    """
+
+    model = HostGroup
+    success_url = "/hostgroups/list"
+
+    def form_valid(self, form):
+
+        # Log Update
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UPDATE_HOSTGROUP",
+            objectid = self.object.id,
+            comment = _(
+                "Updated hostgroup.\n"
+                "Original data:\n"
+                "Name: %(name)s\n"
+                "%(comment)s\n"
+                "New data:\n"
+                "Name: %(newname)s\n"
+                "%(newcomment)s\n"
+                % {
+                    "name": self.object.name,
+                    "comment": self.object.comment,
+                    "newname": form.name,
+                    "newcomment": form.comment
+                }
+
+            )
+        ).save()
+
+        # Save object
+
+        self.object = form.save()
 
         return super(ModelFormMixin, self).form_valid(form)
 

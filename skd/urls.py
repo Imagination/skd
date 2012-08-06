@@ -20,7 +20,8 @@ from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, \
     HostGroupUserGroupListView, HostGroupUserGroupAssignView, \
     HostGroupUserGroupUnassignView, SetupView, HostSetupView, ApplyView, \
     UserDeleteView, HostDeleteView, UserGroupDeleteView, HostGroupDeleteView,\
-    UserCreateView, UserGroupCreateView, HostCreateView, HostGroupCreateView
+    UserCreateView, UserGroupCreateView, HostCreateView, HostGroupCreateView,\
+    UserUpdateView, UserGroupUpdateView, HostUpdateView, HostGroupUpdateView
 
 
 urlpatterns = patterns('keys.views',
@@ -71,10 +72,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^users/edit/(?P<pk>.*)$",
         permission_required("keys.change_user")(
-            UpdateView.as_view(
-                model = User,
-                success_url = "/users/list"
-            )
+            UserUpdateView.as_view()
         ),
         name = "users_edit"
     ),
@@ -167,10 +165,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^usergroups/edit/(?P<pk>.*)$",
         permission_required("keys.change_usergroup")(
-            UpdateView.as_view(
-                model = UserGroup,
-                success_url = "/usergroups/list"
-            )
+            UserGroupUpdateView.as_view()
         ),
         name = "usergroups_edit"
     ),
@@ -255,10 +250,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^hosts/edit/(?P<pk>.*)$",
         permission_required("keys.change_host")(
-            UpdateView.as_view(
-                model = Host,
-                success_url = "/hosts/list"
-            )
+            HostUpdateView.as_view()
         ),
         name = "hosts_edit"
     ),
@@ -327,10 +319,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^hostgroups/edit/(?P<pk>.*)$",
         permission_required("keys.change_host")(
-            UpdateView.as_view(
-                model = HostGroup,
-                success_url = "/hostgroups/list"
-            )
+            HostGroupUpdateView.as_view()
         ),
         name = "hostgroups_edit"
     ),

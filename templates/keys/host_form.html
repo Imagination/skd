@@ -35,6 +35,15 @@
         <div>
             {{ form.user.label_tag }}
             {{ form.user }}
+            {% if object.name %}
+            <span id="id_user_hint" class="hint">
+                {% blocktrans %}
+                    When updating a username, <strong>skd</strong> will
+                    <strong>not</strong> automatically delete the keys from
+                    the old username. You have to do this manually!
+                {% endblocktrans %}
+            </span>
+            {% endif %}
         </div>
         <div>
             {{ form.comment.label_tag }}
@@ -49,3 +58,17 @@
     </form>
 
 {% endblock content %}
+
+{% block scripts %}
+
+    <script type="text/javascript">
+        $("#id_user").focus(function () {
+            $("#id_user_hint").css("display", "inline");
+        });
+
+        $("#id_user").blur(function () {
+            $("#id_user_hint").css("display", "none")
+        });
+    </script>
+
+{% endblock scripts %}

@@ -303,13 +303,46 @@ class SetupView(TemplateView):
 
 # User views
 
+class UserCreateView(CreateView):
+    """
+    Creates a user.
+
+    **Context**
+
+    ``RequestContext``
+
+    **Template:**
+
+    :template:`keys/user_form.html`
+    """
+
+    model = User
+    success_url = "/users/list"
+
+    def form_valid(self, form):
+
+        # Save object
+
+        self.object = form.save()
+
+        # Log Creation
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "CREATE_USER",
+            objectid = self.object.id
+        ).save()
+
+        return super(ModelFormMixin, self).form_valid(form)
+
 class UserDeleteView(DeleteView):
     """
     Deletes a user.
 
     **Context**
 
-    ``RequestContext`
+    ``RequestContext``
 
     **Template:**
 
@@ -432,6 +465,34 @@ class UserKeyCreateView(CreateView):
             }
         )
 
+    def form_valid(self, form):
+
+        # Save object
+
+        self.object = form.save()
+
+        # Log affected hosts
+
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__user__id =
+            self.object.user.id
+        )
+
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
+
+        # Log Creation
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "CREATE_KEY",
+            objectid = self.object.id
+        ).save()
+
+        return super(ModelFormMixin, self).form_valid(form)
+
 class UserKeyUpdateView(UpdateView):
     """
     Edits an existing key of a user.
@@ -548,13 +609,47 @@ class UserKeyDeleteView(DeleteView):
 
 # User/Group
 
+class UserGroupCreateView(CreateView):
+    """
+    Creates a usergroup.
+
+    **Context**
+
+    ``RequestContext``
+
+    **Template:**
+
+    :template:`keys/usergroup_form.html`
+    """
+
+    model = UserGroup
+    success_url = "/usergroups/list"
+
+    def form_valid(self, form):
+
+        # Save object
+
+        self.object = form.save()
+
+        # Log Creation
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "CREATE_USERGROUP",
+            objectid = self.object.id
+        ).save()
+
+        return super(ModelFormMixin, self).form_valid(form)
+
+
 class UserGroupDeleteView(DeleteView):
     """
     Deletes a usergroup.
 
     **Context**
 
-    ``RequestContext`
+    ``RequestContext``
 
     **Template:**
 
@@ -1125,13 +1220,46 @@ class UserGroupHostGroupUnassignView(DeleteView):
 
 # Host-Views
 
+class HostCreateView(CreateView):
+    """
+    Creates a host.
+
+    **Context**
+
+    ``RequestContext``
+
+    **Template:**
+
+    :template:`keys/host_form.html`
+    """
+
+    model = Host
+    success_url = "/hosts/list"
+
+    def form_valid(self, form):
+
+        # Save object
+
+        self.object = form.save()
+
+        # Log Creation
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "CREATE_HOST",
+            objectid = self.object.id
+        ).save()
+
+        return super(ModelFormMixin, self).form_valid(form)
+
 class HostDeleteView(DeleteView):
     """
     Deletes a host.
 
     **Context**
 
-    ``RequestContext`
+    ``RequestContext``
 
     **Template:**
 
@@ -1262,6 +1390,39 @@ class HostSetupView(TemplateView):
         return self.get(request, *args, **kwargs)
 
 # Host/Group
+
+class HostGroupCreateView(CreateView):
+    """
+    Creates a host.
+
+    **Context**
+
+    ``RequestContext``
+
+    **Template:**
+
+    :template:`keys/host_form.html`
+    """
+
+    model = HostGroup
+    success_url = "/hostgroups/list"
+
+    def form_valid(self, form):
+
+        # Save object
+
+        self.object = form.save()
+
+        # Log Creation
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "CREATE_HOSTGROUP",
+            objectid = self.object.id
+        ).save()
+
+        return super(ModelFormMixin, self).form_valid(form)
 
 class HostGroupDeleteView(DeleteView):
     """

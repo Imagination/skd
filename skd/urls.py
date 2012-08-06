@@ -19,7 +19,8 @@ from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, \
     UserGroupHostGroupAssignView, UserGroupHostGroupUnassignView, \
     HostGroupUserGroupListView, HostGroupUserGroupAssignView, \
     HostGroupUserGroupUnassignView, SetupView, HostSetupView, ApplyView, \
-    UserDeleteView, HostDeleteView, UserGroupDeleteView, HostGroupDeleteView
+    UserDeleteView, HostDeleteView, UserGroupDeleteView, HostGroupDeleteView,\
+    UserCreateView, UserGroupCreateView, HostCreateView, HostGroupCreateView
 
 
 urlpatterns = patterns('keys.views',
@@ -62,10 +63,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^users/create",
         permission_required("keys.add_user")(
-            CreateView.as_view(
-                model = User,
-                success_url = "/users/list"
-            )
+            UserCreateView.as_view()
         ),
         name = "users_create"
     ),
@@ -161,10 +159,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^usergroups/create$",
         permission_required("keys.add_usergroup")(
-            CreateView.as_view(
-                model = UserGroup,
-                success_url = "/usergroups/list"
-            )
+            UserGroupCreateView.as_view()
         ),
         name = "usergroups_create"
     ),
@@ -252,10 +247,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^hosts/create$",
         permission_required("keys.add_host")(
-            CreateView.as_view(
-                model = Host,
-                success_url = "/hosts/list"
-            )
+            HostCreateView.as_view()
         ),
         name = "hosts_create"
     ),
@@ -327,10 +319,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^hostgroups/create$",
         permission_required("keys.add_hostgroup")(
-            CreateView.as_view(
-                model = HostGroup,
-                success_url = "/hostgroups/list"
-            )
+            HostGroupCreateView.as_view()
         ),
         name = "hostgroups_create"
     ),

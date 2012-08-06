@@ -19,7 +19,7 @@ from keys.views import UserKeyListView,UserKeyCreateView, UserKeyUpdateView, \
     UserGroupHostGroupAssignView, UserGroupHostGroupUnassignView, \
     HostGroupUserGroupListView, HostGroupUserGroupAssignView, \
     HostGroupUserGroupUnassignView, SetupView, HostSetupView, ApplyView, \
-    UserDeleteView
+    UserDeleteView, HostDeleteView, UserGroupDeleteView, HostGroupDeleteView
 
 
 urlpatterns = patterns('keys.views',
@@ -183,10 +183,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^usergroups/delete/(?P<pk>.*)$",
         permission_required("keys.delete_usergroup")(
-            DeleteView.as_view(
-                model = UserGroup,
-                success_url = "/usergroups/list"
-            )
+            UserGroupDeleteView.as_view()
         ),
         name = "usergroups_delete"
     ),
@@ -277,10 +274,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^hosts/delete/(?P<pk>.*)$",
         permission_required("keys.delete_host")(
-            DeleteView.as_view(
-                model = Host,
-                success_url = "/hosts/list"
-            )
+            HostDeleteView.as_view()
         ),
         name = "hosts_delete"
     ),
@@ -355,10 +349,7 @@ urlpatterns = patterns('keys.views',
     url(
         r"^hostgroups/delete/(?P<pk>.*)$",
         permission_required("keys.delete_host")(
-            DeleteView.as_view(
-                model = HostGroup,
-                success_url = "/hostgroups/list"
-            )
+            HostGroupDeleteView.as_view()
         ),
         name = "hostgroups_delete"
     ),

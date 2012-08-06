@@ -155,12 +155,7 @@ class UserGroupInHostGroup(models.Model):
 
 class ActionLog(models.Model):
     """
-    Logs changes in the UI, that are applied to the system when the
-    user clicks "Apply".
-
-    The important changes are assignments and unassignments of hostgroups,
-    usergroups and hostgroup<>usergroups. That's when keys have to be
-    granted or revoked.
+    Logs changes in the UI for an audit trail.
 
     Has a relation to :model:`auth.User`
     """
@@ -168,17 +163,25 @@ class ActionLog(models.Model):
     timestamp = models.DateTimeField(null = False)
     user = models.ForeignKey(django.contrib.auth.models.User)
     action = models.CharField(max_length = 100, blank = False)
-    groupid = models.IntegerField(null = False)
-    memberid = models.IntegerField(null = False)
+    objectid = models.IntegerField(null = True)
+    objectid2 = models.IntegerField(null = True)
     comment = models.TextField(blank = True)
+
+class ApplyLog(models.Model):
+    """
+    Logs hosts, that are affected by changes in the UI.
+    These hosts are taken into account, when the user clicks on "Apply".
+    """
+
+    host = models.ForeignKey(Host)
 
     class Meta:
         permissions = (
             (
                 "can_apply",
                 "The user can apply the action log"
-            ),
-        )
+                ),
+            )
 
 class Configuration(models.Model):
     """

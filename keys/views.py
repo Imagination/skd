@@ -14,7 +14,7 @@ from paramiko.dsskey import DSSKey
 from paramiko.ssh_exception import AuthenticationException, SSHException
 import sys
 from keys.models import User,Key, UserGroup, UserInGroup, HostInGroup, Host, \
-    HostGroup, UserGroupInHostGroup, Configuration, ActionLog
+    HostGroup, UserGroupInHostGroup, Configuration, ActionLog, ApplyLog
 from django.utils.translation import ugettext as _
 
 # Apply-View
@@ -305,7 +305,7 @@ class SetupView(TemplateView):
 
 class UserDeleteView(DeleteView):
     """
-    Delets a user.
+    Deletes a user.
 
     **Context**
 
@@ -319,6 +319,46 @@ class UserDeleteView(DeleteView):
 
     model = User
     success_url = "/users/list"
+
+    def delete(self, request, *args, **kwargs):
+
+        # Delete object
+
+        self.object = self.get_object()
+
+        # Log affected hosts
+
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__user__id =
+            self.object.id
+        )
+
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
+
+        # Log Deletion
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "DELETE_USER",
+            comment = _(
+                "Deleting user %(name)s (%(fullname)s) with comment %"
+                "(comment)s" %
+                {
+                    "name": self.object.name,
+                    "fullname": self.object.fullname,
+                    "comment": self.object.comment
+                }
+            )
+        ).save()
+
+        # Delete object
+
+        self.object.delete()
+
+        return HttpResponseRedirect(self.get_success_url())
 
 # User/Key
 
@@ -467,7 +507,101 @@ class UserKeyDeleteView(DeleteView):
             }
         )
 
+    def delete(self, request, *args, **kwargs):
+
+        # Delete object
+
+        self.object = self.get_object()
+
+        # Log affected hosts
+
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__user__id =
+            self.object.user.id
+        )
+
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
+
+        # Log Deletion
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "DELETE_KEY_FROM_USER",
+            comment = _(
+                "Deleting key '%(name)s' from user %(username)s with comment "
+                "%(comment)s" % {
+                    "name": self.object.name,
+                    "username": self.object.user.name,
+                    "comment": self.object.comment
+                }
+            )
+        ).save()
+
+        # Delete object
+
+        self.object.delete()
+
+        return HttpResponseRedirect(self.get_success_url())
+
 # User/Group
+
+class UserGroupDeleteView(DeleteView):
+    """
+    Deletes a usergroup.
+
+    **Context**
+
+    ``RequestContext`
+
+    **Template:**
+
+    :template:`keys/usergroup_confirm_delete.html`
+
+    """
+
+    model = UserGroup
+    success_url = "/usergroups/list"
+
+    def delete(self, request, *args, **kwargs):
+
+        # Delete object
+
+        self.object = self.get_object()
+
+        # Log affected hosts
+
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__id =
+            self.object.id
+        )
+
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
+
+        # Log Deletion
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "DELETE_USERGROUP",
+            comment = _(
+                "Deleting usergroup %(name)s with comment %(comment)s" %
+                {
+                    "name": self.object.name,
+                    "comment": self.object.comment
+                }
+            )
+        ).save()
+
+        # Delete object
+
+        self.object.delete()
+
+        return HttpResponseRedirect(self.get_success_url())
 
 class UserGroupListView(ListView):
     """
@@ -545,36 +679,26 @@ class UserGroupAssignView(CreateView):
 
         self.object = form.save()
 
-        # Filter an "UNASSIGN"-logentry for the same user.
+        # Log affected hosts
 
-        unassign_logs = ActionLog.objects.filter(
-            action = "UNASSIGN_USERINGROUP",
-            groupid = self.object.group.id,
-            memberid = self.object.user.id
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__id =
+                self.object.group.id
         )
 
-        if unassign_logs.count() == 1:
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
 
-            # There already is an assignment for that. Remove that one
+        # Log Assignment
 
-            for unassign_log in unassign_logs:
-                unassign_log.delete()
-
-        elif unassign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Assignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "ASSIGN_USERINGROUP",
-                groupid = self.object.group.id,
-                memberid = self.object.user.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "ASSIGN_USERINGROUP",
+            objectid = self.object.user.id,
+            objectid2 = self.object.group.id
+        ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
 
@@ -624,36 +748,26 @@ class UserGroupUnassignView(DeleteView):
 
         self.object = self.get_object()
 
-        # Filter an "ASSIGN"-logentry for the same host.
+        # Log affected hosts
 
-        assign_logs = ActionLog.objects.filter(
-            action = "ASSIGN_USERINGROUP",
-            groupid = self.object.group.id,
-            memberid = self.object.user.id
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__id =
+            self.object.group.id
         )
 
-        if assign_logs.count() == 1:
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
 
-            # There already is an assignment for that. Remove that one
+        # Log Unassignment
 
-            for assign_log in assign_logs:
-                assign_log.delete()
-
-        elif assign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Unassignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "UNASSIGN_USERINGROUP",
-                groupid = self.object.group.id,
-                memberid = self.object.user.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UNASSIGN_USERINGROUP",
+            objectid = self.object.user.id,
+            objectid2 = self.object.group.id
+        ).save()
 
         # Delete object
 
@@ -739,36 +853,26 @@ class UserGroupUserAssignView(CreateView):
 
         self.object = form.save()
 
-        # Filter an "UNASSIGN"-logentry for the same user.
+        # Log affected hosts
 
-        unassign_logs = ActionLog.objects.filter(
-            action = "UNASSIGN_USERINGROUP",
-            groupid = self.object.group.id,
-            memberid = self.object.user.id
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__id =
+            self.object.group.id
         )
 
-        if unassign_logs.count() == 1:
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
 
-            # There already is an assignment for that. Remove that one
+        # Log Assignment
 
-            for unassign_log in unassign_logs:
-                unassign_log.delete()
-
-        elif unassign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Assignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "ASSIGN_USERINGROUP",
-                groupid = self.object.group.id,
-                memberid = self.object.user.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "ASSIGN_USERINGROUP",
+            objectid = self.object.user.id,
+            objectid2 = self.object.group.id
+        ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
 
@@ -818,36 +922,26 @@ class UserGroupUserUnassignView(DeleteView):
 
         self.object = self.get_object()
 
-        # Filter an "ASSIGN"-logentry for the same host.
+        # Log affected hosts
 
-        assign_logs = ActionLog.objects.filter(
-            action = "ASSIGN_USERINGROUP",
-            groupid = self.object.group.id,
-            memberid = self.object.user.id
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__id =
+            self.object.group.id
         )
 
-        if assign_logs.count() == 1:
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
 
-            # There already is an assignment for that. Remove that one
+        # Log Unassignment
 
-            for assign_log in assign_logs:
-                assign_log.delete()
-
-        elif assign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Unassignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "UNASSIGN_USERINGROUP",
-                groupid = self.object.group.id,
-                memberid = self.object.user.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UNASSIGN_USERINGROUP",
+            objectid = self.object.user.id,
+            objectid2 = self.object.group.id
+        ).save()
 
         # Delete object
 
@@ -933,36 +1027,26 @@ class UserGroupHostGroupAssignView(CreateView):
 
         self.object = form.save()
 
-        # Filter an "UNASSIGN"-logentry for the same host.
+        # Log affected hosts
 
-        unassign_logs = ActionLog.objects.filter(
-            action = "UNASSIGN_USERGROUPINHOSTGROUP",
-            groupid = self.object.hostgroup.id,
-            memberid = self.object.usergroup.id
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__id =
+            self.object.hostgroup.id
         )
 
-        if unassign_logs.count() == 1:
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
 
-            # There already is an assignment for that. Remove that one
+        # Log Assignment
 
-            for unassign_log in unassign_logs:
-                unassign_log.delete()
-
-        elif unassign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Assignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "ASSIGN_USERGROUPINHOSTGROUP",
-                groupid = self.object.hostgroup.id,
-                memberid = self.object.usergroup.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "ASSIGN_USERGROUPINHOSTGROUP",
+            objectid = self.object.usergroup.id,
+            objectid2 = self.object.hostgroup.id
+        ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
 
@@ -1012,36 +1096,26 @@ class UserGroupHostGroupUnassignView(DeleteView):
 
         self.object = self.get_object()
 
-        # Filter an "ASSIGN"-logentry for the same host.
+        # Log affected hosts
 
-        assign_logs = ActionLog.objects.filter(
-            action = "ASSIGN_USERGROUPINHOSTGROUP",
-            groupid = self.object.hostgroup.id,
-            memberid = self.object.usergroup.id
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__id =
+            self.object.hostgroup.id
         )
 
-        if assign_logs.count() == 1:
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
 
-            # There already is an assignment for that. Remove that one
+        # Log Unassignment
 
-            for assign_log in assign_logs:
-                assign_log.delete()
-
-        elif assign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Unassignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "UNASSIGN_USERGROUPINHOSTGROUP",
-                groupid = self.object.hostgroup.id,
-                memberid = self.object.usergroup.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UNASSIGN_USERGROUPINHOSTGROUP",
+            objectid = self.object.usergroup.id,
+            objectid2 = self.object.hostgroup.id
+        ).save()
 
         # Delete object
 
@@ -1050,6 +1124,53 @@ class UserGroupHostGroupUnassignView(DeleteView):
         return HttpResponseRedirect(self.get_success_url())
 
 # Host-Views
+
+class HostDeleteView(DeleteView):
+    """
+    Deletes a host.
+
+    **Context**
+
+    ``RequestContext`
+
+    **Template:**
+
+    :template:`keys/host_confirm_delete.html`
+
+    """
+
+    model = Host
+    success_url = "/hosts/list"
+
+    def delete(self, request, *args, **kwargs):
+
+        # Delete object
+
+        self.object = self.get_object()
+
+        # Log Deletion
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "DELETE_HOST",
+            comment = _(
+                "Deleting host %(user)s@%(name)s (%(fqdn)s) with comment %"
+                "(comment)s" %
+                {
+                    "name": self.object.name,
+                    "fqdn": self.object.fqdn,
+                    "user": self.object.user,
+                    "comment": self.object.comment
+                }
+            )
+        ).save()
+
+        # Delete object
+
+        self.object.delete()
+
+        return HttpResponseRedirect(self.get_success_url())
 
 # Setup
 
@@ -1140,8 +1261,62 @@ class HostSetupView(TemplateView):
 
         return self.get(request, *args, **kwargs)
 
-
 # Host/Group
+
+class HostGroupDeleteView(DeleteView):
+    """
+    Deletes a hostgroup.
+
+    **Context**
+
+    ``RequestContext`
+
+    **Template:**
+
+    :template:`keys/hostgroup_confirm_delete.html`
+
+    """
+
+    model = HostGroup
+    success_url = "/hostgroups/list"
+
+    def delete(self, request, *args, **kwargs):
+
+        # Delete object
+
+        self.object = self.get_object()
+
+        # Log affected hosts
+
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__id =
+            self.object.id
+        )
+
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
+
+        # Log Deletion
+
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "DELETE_HOSTGROUP",
+            comment = _(
+                "Deleting hostgroup %(name)s with comment %(comment)s" %
+                {
+                    "name": self.object.name,
+                    "comment": self.object.comment
+                }
+            )
+        ).save()
+
+        # Delete object
+
+        self.object.delete()
+
+        return HttpResponseRedirect(self.get_success_url())
 
 class HostGroupListView(ListView):
     """
@@ -1219,36 +1394,20 @@ class HostGroupAssignView(CreateView):
 
         self.object = form.save()
 
-        # Filter an "UNASSIGN"-logentry for the same host.
+        # Log affected host
 
-        unassign_logs = ActionLog.objects.filter(
-            action = "UNASSIGN_HOSTINGROUP",
-            groupid = self.object.group.id,
-            memberid = self.object.host.id
-        )
+        if not ApplyLog.objects.filter(host = self.object.host).exists():
+            ApplyLog(host = self.object.host).save()
 
-        if unassign_logs.count() == 1:
+        # Log Assignment
 
-            # There already is an assignment for that. Remove that one
-
-            for unassign_log in unassign_logs:
-                unassign_log.delete()
-
-        elif unassign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Assignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "ASSIGN_HOSTINGROUP",
-                groupid = self.object.group.id,
-                memberid = self.object.host.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "ASSIGN_HOSTINGROUP",
+            objectid = self.object.host.id,
+            objectid2 = self.object.group.id
+        ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
 
@@ -1298,36 +1457,20 @@ class HostGroupUnassignView(DeleteView):
 
         self.object = self.get_object()
 
-        # Filter an "ASSIGN"-logentry for the same host.
+        # Log affected host
 
-        assign_logs = ActionLog.objects.filter(
-            action = "ASSIGN_HOSTINGROUP",
-            groupid = self.object.group.id,
-            memberid = self.object.host.id
-        )
+        if not ApplyLog.objects.filter(host = self.object.host).exists():
+            ApplyLog(host = self.object.host).save()
 
-        if assign_logs.count() == 1:
+        # Log Unassignment
 
-            # There already is an assignment for that. Remove that one
-
-            for assign_log in assign_logs:
-                assign_log.delete()
-
-        elif assign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Unassignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "UNASSIGN_HOSTINGROUP",
-                groupid = self.object.group.id,
-                memberid = self.object.host.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UNASSIGN_HOSTINGROUP",
+            objectid = self.object.host.id,
+            objectid2 = self.object.group.id
+        ).save()
 
         # Delete object
 
@@ -1413,36 +1556,20 @@ class HostGroupHostAssignView(CreateView):
 
         self.object = form.save()
 
-        # Filter an "UNASSIGN"-logentry for the same host.
+        # Log affected host
 
-        unassign_logs = ActionLog.objects.filter(
-            action = "UNASSIGN_HOSTINGROUP",
-            groupid = self.object.group.id,
-            memberid = self.object.host.id
-        )
+        if not ApplyLog.objects.filter(host = self.object.host).exists():
+            ApplyLog(host = self.object.host).save()
 
-        if unassign_logs.count() == 1:
+        # Log Assignment
 
-            # There already is an assignment for that. Remove that one
-
-            for unassign_log in unassign_logs:
-                unassign_log.delete()
-
-        elif unassign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Assignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "ASSIGN_HOSTINGROUP",
-                groupid = self.object.group.id,
-                memberid = self.object.host.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "ASSIGN_HOSTINGROUP",
+            objectid = self.object.host.id,
+            objectid2 = self.object.group.id
+        ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
 
@@ -1492,36 +1619,20 @@ class HostGroupHostUnassignView(DeleteView):
 
         self.object = self.get_object()
 
-        # Filter an "ASSIGN"-logentry for the same host.
+        # Log affected host
 
-        assign_logs = ActionLog.objects.filter(
-            action = "ASSIGN_HOSTINGROUP",
-            groupid = self.object.group.id,
-            memberid = self.object.host.id
-        )
+        if not ApplyLog.objects.filter(host = self.object.host).exists():
+            ApplyLog(host = self.object.host).save()
 
-        if assign_logs.count() == 1:
+        # Log Unassignment
 
-            # There already is an assignment for that. Remove that one
-
-            for assign_log in assign_logs:
-                assign_log.delete()
-
-        elif assign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Unassignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "UNASSIGN_HOSTINGROUP",
-                groupid = self.object.group.id,
-                memberid = self.object.host.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UNASSIGN_HOSTINGROUP",
+            objectid = self.object.host.id,
+            objectid2 = self.object.group.id
+        ).save()
 
         # Delete object
 
@@ -1607,36 +1718,26 @@ class HostGroupUserGroupAssignView(CreateView):
 
         self.object = form.save()
 
-        # Filter an "UNASSIGN"-logentry for the same host.
+        # Log affected hosts
 
-        unassign_logs = ActionLog.objects.filter(
-            action = "UNASSIGN_USERGROUPINHOSTGROUP",
-            groupid = self.object.hostgroup.id,
-            memberid = self.object.usergroup.id
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__id =
+            self.object.hostgroup.id
         )
 
-        if unassign_logs.count() == 1:
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
 
-            # There already is an assignment for that. Remove that one
+        # Log Assignment
 
-            for unassign_log in unassign_logs:
-                unassign_log.delete()
-
-        elif unassign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Assignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "ASSIGN_USERGROUPINHOSTGROUP",
-                groupid = self.object.hostgroup.id,
-                memberid = self.object.usergroup.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "ASSIGN_USERGROUPINHOSTGROUP",
+            objectid = self.object.usergroup.id,
+            objectid2= self.object.hostgroup.id
+        ).save()
 
         return super(ModelFormMixin, self).form_valid(form)
 
@@ -1686,36 +1787,26 @@ class HostGroupUserGroupUnassignView(DeleteView):
 
         self.object = self.get_object()
 
-        # Filter an "ASSIGN"-logentry for the same host.
+        # Log affected hosts
 
-        assign_logs = ActionLog.objects.filter(
-            action = "ASSIGN_USERGROUPINHOSTGROUP",
-            groupid = self.object.hostgroup.id,
-            memberid = self.object.usergroup.id
+        affected_hosts = Host.objects.filter(
+            hostingroup__group__id =
+            self.object.hostgroup.id
         )
 
-        if assign_logs.count() == 1:
+        for host in affected_hosts:
+            if not ApplyLog.objects.filter(host = host).exists():
+                ApplyLog(host = host).save()
 
-            # There already is an assignment for that. Remove that one
+        # Log Unassignment
 
-            for assign_log in assign_logs:
-                assign_log.delete()
-
-        elif assign_logs.count() > 1:
-
-            raise _("System error. Retrieved more than one assignment log.")
-
-        else:
-
-            # Log Unassignment
-
-            ActionLog(
-                timestamp = datetime.now(),
-                user = self.request.user,
-                action = "UNASSIGN_USERGROUPINHOSTGROUP",
-                groupid = self.object.hostgroup.id,
-                memberid = self.object.usergroup.id
-            ).save()
+        ActionLog(
+            timestamp = datetime.now(),
+            user = self.request.user,
+            action = "UNASSIGN_USERGROUPINHOSTGROUP",
+            objectid = self.object.usergroup.id,
+            objectid2 = self.object.hostgroup.id
+        ).save()
 
         # Delete object
 

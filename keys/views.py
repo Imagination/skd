@@ -59,57 +59,10 @@ class ApplyView(TemplateView):
             self.affected_hosts = set()
             self.mode = "scanned"
 
-            scan_timestamp = datetime.now()
+            for host in ApplyLog.objects.all():
+                self.affected_hosts.add(host.host.id)
 
-            # Check the ActionLog and analyze pending changes.
-
-            for line in ActionLog.objects.filter(
-                timestamp__lte = scan_timestamp
-            ).order_by("timestamp"):
-
-                if line.action == "UNASSIGN_HOSTINGROUP" or\
-                   line.action == "ASSIGN_HOSTINGROUP":
-
-                    # A host has been added to or removed from a hostgroup
-
-                    self.affected_hosts.add(line.memberid)
-
-                elif line.action == "UNASSIGN_USERINGROUP" or\
-                    line.action == "ASSIGN_USERINGROUP":
-
-                    # A user has been assigned to or removed from a usergroup
-
-                    # Find all hosts for this usergroup
-
-                    affected_mastergroups =\
-                        UserGroupInHostGroup.objects.filter(
-                        usergroup__id = line.groupid
-                    )
-
-                    for hostgroup in affected_mastergroups:
-
-                        affected_hosts = Host.objects.filter(
-                            hostingroup__group__id = hostgroup.id
-                        )
-
-                        for host in affected_hosts:
-                            self.affected_hosts.add(host.id)
-
-                elif line.action == "UNASSIGN_USERGROUPINHOSTGROUP" or\
-                    line.action == "ASSIGN_USERGROUPINHOSTGROUP":
-
-                    # A usergroup has been removed from a hostgroup or vice
-                    # versa
-
-                    affected_hosts = Host.objects.filter(
-                        hostingroup__group__id = line.groupid
-                    )
-
-                    for host in affected_hosts:
-                        self.affected_hosts.add(host.id)
-
-                request.session["affected_hosts"] = self.affected_hosts
-                request.session["scan_timestamp"] = scan_timestamp
+            request.session["affected_hosts"] = self.affected_hosts
 
         elif "do_apply" in request.POST:
 
@@ -217,6 +170,10 @@ class ApplyView(TemplateView):
                             }
                         ))
 
+                        # Delete host from apply-Log.
+
+                        ApplyLog.objects.get(host = host).delete()
+
                     except SSHException:
 
                         self.ssh_messages.append(_(
@@ -228,12 +185,6 @@ class ApplyView(TemplateView):
                                 "user": host.user
                             }
                         ))
-
-            # Delete the action log up to the scan time
-
-            ActionLog.objects.filter(
-                timestamp__lte = request.session["scan_timestamp"]
-            ).delete()
 
         return self.get(request, *args, **kwargs)
 
@@ -374,9 +325,9 @@ class UserUpdateView(UpdateView):
                     "name": self.object.name,
                     "fullname": self.object.fullname,
                     "comment": self.object.comment,
-                    "newname": form.name,
-                    "newfullname": form.fullname,
-                    "newcomment": form.comment
+                    "newname": form.data["name"],
+                    "newfullname": form.data["fullname"],
+                    "newcomment": form.data["comment"]
                 }
             )
         ).save()
@@ -579,9 +530,9 @@ class UserKeyUpdateView(UpdateView):
 
     def get_success_url(self):
         return reverse(
-            "user_keys_list",
+            "users_keys_list",
             kwargs = {
-                self.key_owner.id
+                "user": self.key_owner.id
             }
         )
 
@@ -606,12 +557,13 @@ class UserKeyUpdateView(UpdateView):
                 "Key: %(newkey)s\n"
                 "%(newcomment)s\n"
                 % {
+                    "user": self.object.user.name,
                     "name": self.object.name,
                     "key": self.object.key,
                     "comment": self.object.comment,
-                    "newname": form.name,
-                    "newkey": form.key,
-                    "newcomment": form.comment
+                    "newname": form.data["name"],
+                    "newkey": form.data["key"],
+                    "newcomment": form.data["comment"]
                 }
             )
         ).save()
@@ -779,8 +731,8 @@ class UserGroupUpdateView(UpdateView):
                 % {
                     "name": self.object.name,
                     "comment": self.object.comment,
-                    "newname": form.name,
-                    "newcomment": form.comment
+                    "newname": form.data["name"],
+                    "newcomment": form.data["comment"]
                 }
             )
         ).save()
@@ -925,7 +877,7 @@ class UserGroupAssignView(CreateView):
         # Log affected hosts
 
         affected_hosts = Host.objects.filter(
-            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__id =
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__group__id =
                 self.object.group.id
         )
 
@@ -1099,7 +1051,7 @@ class UserGroupUserAssignView(CreateView):
         # Log affected hosts
 
         affected_hosts = Host.objects.filter(
-            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__id =
+            hostingroup__group__usergroupinhostgroup__usergroup__useringroup__group__id =
             self.object.group.id
         )
 
@@ -1444,10 +1396,10 @@ class HostUpdateView(UpdateView):
                     "fqdn": self.object.fqdn,
                     "user": self.object.user,
                     "comment": self.object.comment,
-                    "newname": form.name,
-                    "newfqdn": form.fqdn,
-                    "newuser": form.user,
-                    "newcomment": form.comment
+                    "newname": form.data["name"],
+                    "newfqdn": form.data["fqdn"],
+                    "newuser": form.data["user"],
+                    "newcomment": form.data["comment"]
                 }
             )
         ).save()
@@ -1670,8 +1622,8 @@ class HostGroupUpdateView(UpdateView):
                 % {
                     "name": self.object.name,
                     "comment": self.object.comment,
-                    "newname": form.name,
-                    "newcomment": form.comment
+                    "newname": form.data["name"],
+                    "newcomment": form.data["comment"]
                 }
 
             )

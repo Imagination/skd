@@ -1,7 +1,6 @@
 import StringIO
 from datetime import datetime
 import socket
-from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -134,7 +133,7 @@ class ApplyView(TemplateView):
 
             private_key_file = StringIO.StringIO(str(private_key_config.value))
 
-            private_key = DSSKey.from_private_key(private_key_file)
+            private_key = DSSKey.from_private_key(file(private_key_file))
 
             private_key_file.close()
 

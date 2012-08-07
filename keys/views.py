@@ -1,6 +1,7 @@
 import StringIO
 from datetime import datetime
 import socket
+from django.contrib.auth import models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -264,6 +265,183 @@ class SetupView(TemplateView):
 
     template_name = "keys/setup.html"
 
+    default_groups = [
+        {
+            "name": "skd_viewer",
+            "description": "Users can only view and list objects like users, "
+                           "keys, hosts, etc. They cannot edit, delete or "
+                           "create them and cannot apply changes. They cannot"
+                           " see the Action Log.",
+            "permissions": [
+                "keys.list_users",
+                "keys.list_users_keys",
+                "keys.list_usergroups",
+                "keys.list_users_in_usergroups",
+                "keys.list_hosts",
+                "keys.list_hostgroups",
+                "keys.list_hosts_in_hostgroups",
+                "keys.list_usergroups_in_hostgroups"
+            ]
+        },
+        {
+            "name": "skd_audit",
+            "description": "Users can see the action log.",
+            "permissions": [
+                "keys.list_users",
+                "keys.list_users_keys",
+                "keys.list_usergroups",
+                "keys.list_users_in_usergroups",
+                "keys.list_hosts",
+                "keys.list_hostgroups",
+                "keys.list_hosts_in_hostgroups",
+                "keys.list_usergroups_in_hostgroups",
+                "keys.list_actionlog"
+            ]
+        },
+        {
+            "name": "skd_usermanager",
+            "description": "Users have full control of the user, "
+                           "usergroup and key objects",
+            "permissions": [
+                "keys.list_users",
+                "keys.list_users_keys",
+                "keys.list_usergroups",
+                "keys.list_users_in_usergroups",
+                "keys.list_hosts",
+                "keys.list_hostgroups",
+                "keys.list_hosts_in_hostgroups",
+                "keys.list_usergroups_in_hostgroups",
+                "keys.list_actionlog",
+                "keys.add_user",
+                "keys.change_user",
+                "keys.delete_user",
+                "keys.add_key",
+                "keys.change_key",
+                "keys.delete_key",
+                "keys.add_usergroup",
+                "keys.change_usergroup",
+                "keys.delete_usergroup",
+                "keys.add_useringroup",
+                "keys.change_useringroup",
+                "keys.delete_useringroup",
+                "keys.add_actionlog",
+                "keys.add_applylog"
+            ]
+        },
+        {
+            "name": "skd_hostmanager",
+            "description": "Users have the permissions in <em>skd_audit</em> "
+                           "plus full control of the host and hostgroup "
+                           "objects.",
+            "permissions": [
+                "keys.list_users",
+                "keys.list_users_keys",
+                "keys.list_usergroups",
+                "keys.list_users_in_usergroups",
+                "keys.list_hosts",
+                "keys.list_hostgroups",
+                "keys.list_hosts_in_hostgroups",
+                "keys.list_usergroups_in_hostgroups",
+                "keys.list_actionlog",
+                "keys.add_host",
+                "keys.change_host",
+                "keys.delete_host",
+                "keys.add_hostgroup",
+                "keys.change_hostgroup",
+                "keys.delete_hostgroup",
+                "keys.add_hostingroup",
+                "keys.change_hostingroup",
+                "keys.delete_hostingroup",
+                "keys.add_actionlog",
+                "keys.add_applylog"
+            ]
+        },
+        {
+            "name": "skd_manager",
+            "description": "<em>skd_usermanager</em> and "
+                           "<em>skd_hostmanager</em> combined.",
+            "permissions": [
+                "keys.list_users",
+                "keys.list_users_keys",
+                "keys.list_usergroups",
+                "keys.list_users_in_usergroups",
+                "keys.list_hosts",
+                "keys.list_hostgroups",
+                "keys.list_hosts_in_hostgroups",
+                "keys.list_usergroups_in_hostgroups",
+                "keys.list_actionlog",
+                "keys.add_user",
+                "keys.change_user",
+                "keys.delete_user",
+                "keys.add_key",
+                "keys.change_key",
+                "keys.delete_key",
+                "keys.add_usergroup",
+                "keys.change_usergroup",
+                "keys.delete_usergroup",
+                "keys.add_useringroup",
+                "keys.change_useringroup",
+                "keys.delete_useringroup",
+                "keys.add_host",
+                "keys.change_host",
+                "keys.delete_host",
+                "keys.add_hostgroup",
+                "keys.change_hostgroup",
+                "keys.delete_hostgroup",
+                "keys.add_hostingroup",
+                "keys.change_hostingroup",
+                "keys.delete_hostingroup",
+                "keys.add_actionlog",
+                "keys.add_applylog"
+            ]
+        },
+        {
+            "name": "skd_deployer",
+            "description": "Can manage the whole database and apply the "
+                           "changes (thus deploy new keys). Can delete the "
+                           "actionlog.",
+            "permissions": [
+                "keys.list_users",
+                "keys.list_users_keys",
+                "keys.list_usergroups",
+                "keys.list_users_in_usergroups",
+                "keys.list_hosts",
+                "keys.list_hostgroups",
+                "keys.list_hosts_in_hostgroups",
+                "keys.list_usergroups_in_hostgroups",
+                "keys.list_actionlog",
+                "keys.add_user",
+                "keys.change_user",
+                "keys.delete_user",
+                "keys.add_key",
+                "keys.change_key",
+                "keys.delete_key",
+                "keys.add_usergroup",
+                "keys.change_usergroup",
+                "keys.delete_usergroup",
+                "keys.add_useringroup",
+                "keys.change_useringroup",
+                "keys.delete_useringroup",
+                "keys.add_host",
+                "keys.change_host",
+                "keys.delete_host",
+                "keys.add_hostgroup",
+                "keys.change_hostgroup",
+                "keys.delete_hostgroup",
+                "keys.add_hostingroup",
+                "keys.change_hostingroup",
+                "keys.delete_hostingroup",
+                "keys.add_actionlog",
+                "keys.change_actionlog",
+                "keys.delete_actionlog",
+                "keys.can_apply",
+                "keys.add_applylog",
+                "keys.change_applylog",
+                "keys.delete_applylog"
+            ]
+        }
+    ]
+
     def get_context_data(self, **kwargs):
         context = super(SetupView, self).get_context_data(**kwargs)
 
@@ -273,11 +451,16 @@ class SetupView(TemplateView):
                 key = "sshkey_public"
             )
 
+        if not models.Group.objects.filter(name__istartswith = "skd_").exists():
+
+            context["no_groups"] = True
+            context["default_groups"] = self.default_groups
+
         return context
 
     def post(self, request, *args, **kwargs):
 
-        if request.POST["sshkey_generate"]:
+        if "sshkey_generate" in request.POST:
 
             if Configuration.objects.filter(key="sshkey_public").count() == 1:
 
@@ -310,6 +493,31 @@ class SetupView(TemplateView):
             private_key.value = private_key_file.getvalue()
 
             private_key.save()
+
+        if "groups_generate" in request.POST:
+
+            for group in self.default_groups:
+                current_group = models.Group(
+                    name = group["name"]
+                )
+
+                current_group.save()
+
+                for permission in group["permissions"]:
+                    app, codename = permission.split(".")
+
+                    app_ids = models.ContentType.objects.filter(
+                        app_label = app
+                    )
+
+                    permission_object = models.Permission.objects.get (
+                        codename = codename,
+                        content_type_id__in = app_ids
+                    )
+
+                    current_group.permissions.add(permission_object)
+
+                current_group.save()
 
         return self.get(request, *args, **kwargs)
 

@@ -14,7 +14,8 @@
 {% block content %}
 
     {% blocktrans %}
-    <p>Welcome to <strong>skd</strong>, the simple SSH public key distribution
+        <p xmlns="http://www.w3.org/1999/html"
+           xmlns="http://www.w3.org/1999/html">Welcome to <strong>skd</strong>, the simple SSH public key distribution
     software.</p>
 
     <p>This form enables you to set up the basic configuration of
@@ -49,6 +50,35 @@
                    name="sshkey_generate" />
         {% endif %}
 
+    </fieldset>
+    <br />
+    <fieldset>
+        <legend>{% trans "SKD-Groups" %}</legend>
+        {% if no_groups %}
+        {% blocktrans %}
+            <p><strong>skd</strong> can create basic authentication groups
+                when you use the internal authentication database,
+                that have all needed permissions set right.</p>
+            <p>These groups are: (if not noted otherwise, each higher group
+                contains all permissions from the lower groups)</p>
+        {% endblocktrans %}
+            <ul>
+                {% for group in default_groups %}
+                <li>
+                    <strong>{{ group.name }}</strong>: {% trans group.description|safe %}
+                </li>
+                {% endfor %}
+            </ul>
+
+            <p><em>{% trans "(Django administrators have full control about everything)" %}</em></p>
+            <input type="submit" value="{% trans "Generate default groups" %}"
+                   name="groups_generate" />
+        {% else %}
+            {% blocktrans %}
+            <p><strong>skd</strong>-Defaultgroups have already been
+                generate.</p>
+            {% endblocktrans %}
+        {% endif %}
     </fieldset>
 
     </form>

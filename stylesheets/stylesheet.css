@@ -90,7 +90,7 @@ header h2 {
 }
 
 .inner {
-  width: 620px;
+  width: 830px;
   margin: 0 auto;
 }
 
@@ -161,7 +161,10 @@ a.button span {
 #view-on-github span {
   background: transparent url(../images/octocat-icon.png) 12px 50% no-repeat;
 }
-#view-on-github {
+#download-ova span {
+    background: transparent url(../images/vm-icon.png) 12px 50% no-repeat;
+}
+#download-ova {
   margin-right: 0;
 }
 

@@ -30,7 +30,7 @@ Now you can simply add a user with its key and press one button to grant the use
             and other release criteria.
         -->
 		<Version>1.0.0.0</Version>
-		<FullVersion>1.0.0.0 alpha</FullVersion>
+		<FullVersion>1.0b</FullVersion>
 		<ProductUrl>http://dploeger.github.com/skd/</ProductUrl>
 		<VendorUrl>https://github.com/dploeger</VendorUrl>
 		<AppUrl>http://${app.ip}/</AppUrl>

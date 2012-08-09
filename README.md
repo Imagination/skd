@@ -27,7 +27,8 @@ To do this. Copy the vmware-studio/templates/044_amd64 directory into
  /opt/vmware/depot/ISO
 
 Now create a directory /opt/vmware/www/ubuntu_skd and copy the
-distribution-tar.gz-file into it.
+distribution-tar.gz-file ("skd_distrib.tar.gz") into it. Name it with a version
+number (like skd-dist-1.0b.tar.gz) to avoid conversion into .deb-format.
 
 Finally copy the skd-profile vmware-studio/profile/skd.xml to
 /opt/vmware/var/lib/build/profiles in your VMware Studio appliance,

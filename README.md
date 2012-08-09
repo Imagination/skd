@@ -3,49 +3,34 @@ skd
 
 [s]IMPLE [k]EY [d]ISTRIBUTION
 
-Based on [django](https://www.djangoproject.com) and
-[HTML 5 boilerplate](http://html5boilerplate.com). Requires
-[Paramiko](http://www.lag.net/paramiko/).
+Appliance Branch
+----------------
 
-Requirements
-------------
+In this branch the configuration files for a virtual appliance (currently
+supported in OVA-format built using VMware Studio) with python, django,
+a https-configured lighttpd and skd are held.
 
-  * Python >= 2.5
-  * Django >= 1.4
-  * Paramiko >= 1.7.7.2
+Use python makedist.py in the skd_dist-directory  to download the currently
+used packages and build a tar.gz-file to be deployed and unpacked in / in the
+ virtual appliance.
 
-Installation
-------------
+Building in VMware Studio
+-------------------------
 
-After installing the prerequisites, simply extract the skd root to a path
-in your environment (i.e. /usr/local/skd).
+To build the appliance in VMware Studio, you first have to create a new
+template for Ubuntu 10.4.4 and download the appropriate ISO for it.
 
-Configuration
--------------
+To do this. Copy the vmware-studio/templates/044_amd64 directory into
+/opt/vmware/etc/build/templates/ubuntu/10 of your VMware Studio appliance,
+ download the ISO-file ubuntu-10.04.4-server-amd64.iso with the md5sum of
+ 9b218654cdcdf9722171648c52f8a088 from any Ubuntu mirror and put it into
+ /opt/vmware/depot/ISO
 
-Copy the file "skd/local_settings.py.dist" to "skd/local_settings.py" and
-change the values to match your environment.
+Now create a directory /opt/vmware/www/ubuntu_skd and copy the
+distribution-tar.gz-file into it.
 
-After that create the initial database and root user by running
+Finally copy the skd-profile vmware-studio/profile/skd.xml to
+/opt/vmware/var/lib/build/profiles in your VMware Studio appliance,
+fire up the web interface of it and build the profile.
 
-    python manage.py syncdb
-
-to create the configured database and create the administration superuser.
-
-For easy testing you can then use
-
-    python manage.py runserver
-
-from the skd root-directory to run a testing server using Django's
-built-in development server. After that you can normally reach skd at
-
-    http://127.0.0.1:8000
-
-This is, however, not recommended as skd highly recommends running behind
-a HTTPS-secured webserver. You can use skd's supplied wsgi-handler to run
-skd using wsgi in webservers like
-[apache](https://docs.djangoproject.com/en/1.4/howto/deployment/wsgi/modwsgi/)
-or [lighttpd](http://redmine.lighttpd.net/projects/lighttpd2/wiki/Howto_WSGI).
-
-Other deployment options are documented on
-[the django site](https://docs.djangoproject.com/en/1.4/howto/deployment/).
+After building you can download the OVA-file from the web interface.

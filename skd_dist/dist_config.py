@@ -10,7 +10,7 @@ deb_pool = "%s/pool" % (deb_mirror,)
 
 # URLS to debian packages to download
 deb_packages = [
-    "%s/main/n/ncurseslibncurses5-dev_5.7+20090803-2ubuntu3_amd64.deb" % (deb_pool,),
+    "%s/main/n/ncurses/libncurses5-dev_5.7+20090803-2ubuntu3_amd64.deb" % (deb_pool,),
     "%s/main/o/openssl/libssl-dev_0.9.8k-7ubuntu8.13_amd64.deb" % (deb_pool,),
     "%s/main/r/readline6/libreadline-dev_6.1-1_amd64.deb" % (deb_pool,),
     "%s/main/p/pcre3/libpcre3-dev_7.8-3build1_amd64.deb" % (deb_pool,),
@@ -20,7 +20,7 @@ deb_packages = [
     "%s/main/o/openssl/libssl0.9.8_0.9.8k-7ubuntu8.13_amd64.deb" % (deb_pool,),
     "%s/universe/d/dialog/dialog_1.1-20080819-1_amd64.deb" % (deb_pool,),
     "%s/main/r/readline6/libreadline6-dev_6.1-1_amd64.deb" % (deb_pool,),
-    "%s/main/z/zlib/zlib1g-dev_1%%3a1.2.3.3.dfsg-15ubuntu1_amd64.deb" % (deb_pool,)
+    "%s/main/z/zlib/zlib1g-dev_1.2.3.3.dfsg-15ubuntu1_amd64.deb" % (deb_pool,)
 ]
 
 # Base path where the skd distribution will be extracted

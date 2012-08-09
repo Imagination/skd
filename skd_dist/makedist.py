@@ -52,7 +52,7 @@ install = open("install.sh", "w")
 install.writelines(
     "# [s][k][d] virtual appliance installation\n"
     "\n"
-    "cd %s" % (base_path,)
+    "cd %s\n" % (base_path,)
 )
 
 logging.info("Getting additional deb-packages")

@@ -34,6 +34,14 @@ logging.info("Removing previous build")
 
 shutil.rmtree("skd_distrib", True)
 
+try:
+
+    unlink("skd_distrib.tar.gz")
+
+except OSError:
+
+    pass
+
 mkdir("skd_distrib")
 chdir("skd_distrib")
 

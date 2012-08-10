@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Replace these three settings.
+PROJDIR="/usr/local/skd"
+PIDFILE="/var/run/skd.pid"
+SOCKET="/var/run/skd.sock"
+HOST="127.0.0.1"
+PORT="8888"
+PYTHON="/usr/local/python-2.7/bin/python"
+
+case "$1" in
+    start)
+        cd $PROJDIR
+        exec /usr/bin/env - \
+            $PYTHON manage.py runfcgi method=threaded daemonize=true host=$HOST port=$PORT pidfile=$PIDFILE
+        cd - >/dev/null
+        ;;
+    stop)
+        kill `cat -- $PIDFILE`
+        rm -f -- $PIDFILE
+        ;;
+    restart)
+        $0 stop
+        $0 restart
+        ;;
+    *)
+        echo "Usage: $0 [start|stop|restart]"
+        ;;
+esac

@@ -51,6 +51,7 @@ packages = \
                 "mkdir -p /usr/local/lighttpd/www/htdocs",
                 "cp -r %s/lighttpd/conf/* /usr/local/lighttpd/etc/lighttpd" % (contrib_path,),
                 "cp %s/lighttpd/init/lighttpd /etc/init.d" % (contrib_path,),
+                "chmod +x /etc/init.d/lighttpd",
                 "groupadd lighttpd",
                 "useradd -g lighttpd lighttpd",
                 "mkdir /var/log/lighttpd",
@@ -67,8 +68,7 @@ packages = \
             "build": [
                 "./configure --prefix=/usr/local/python-2.7",
                 "make",
-                "make install",
-                "cd .."
+                "make install"
             ]
         },
             {
@@ -87,7 +87,7 @@ packages = \
             "name": "pycrypto",
             "type": "python",
             "version": "2.6",
-            "url": "ftp://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/pycrypto-2.6.tar.gz"
+            "url": "http://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/pycrypto-2.6.tar.gz"
         },
         {
             "name": "paramiko",
@@ -106,8 +106,7 @@ packages = \
             "name": "skd",
             "type": "generic",
             "version": "1.0b",
-            "url": "https://github.com/dploeger/skd/tarball/master",
-            "filename": "skd-1.0b.tar.gz",
+            "url": "https://github.com/downloads/dploeger/skd/skd-1.0b.tar.gz",
             "build": [
                 "mkdir /usr/local/skd",
                 "cp -r * /usr/local/skd",
@@ -115,7 +114,8 @@ packages = \
                 "cd /usr/local/skd",
                 "export LC_ALL=en_US",
                 "/usr/local/python-2.7/bin/python manage.py syncdb",
-                "cp %s/skd/skd-fcgid /etc/init.d" % (contrib_path,)
+                "cp %s/skd/skd-fcgid /etc/init.d" % (contrib_path,),
+                "chmod +x /etc/init.d/skd-fcgid"
             ]
         }
     ]

@@ -75,7 +75,7 @@ packages = \
             "name": "setuptools",
             "type": "python",
             "version": "0.6c11",
-            "url": "http://pypi.python.org/packages/source/s/setuptools/setuptools-0.6c11.tar.gz#md5=7df2a529a074f613b509fb44feefe74e"
+            "url": "http://pypi.python.org/packages/source/s/setuptools/setuptools-0.6c11.tar.gz"
         },
         {
             "name": "flup",
@@ -107,6 +107,7 @@ packages = \
             "type": "generic",
             "version": "1.0b",
             "url": "https://github.com/dploeger/skd/tarball/master",
+            "filename": "skd-1.0b.tar.gz",
             "build": [
                 "mkdir /usr/local/skd",
                 "cp -r * /usr/local/skd",

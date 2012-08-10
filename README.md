@@ -14,6 +14,19 @@ Use python makedist.py in the skd_dist-directory  to download the currently
 used packages and build a tar.gz-file to be deployed and unpacked in / in the
  virtual appliance.
 
+Distribution contents
+---------------------
+
+The distribution is based on Ubuntu 10.4.4 (which is quite old but easily
+available for VMware Studio). It consists of some base packages in .deb-
+format, which are installed and some source distributions of several
+packages.
+
+These packages are installed via a bash install script. This was the easiest
+distribution option. The source packages are compiled during the first boot.
+Perhaps that can be optimized in further versions, because that takes some
+time but, again, was the easiest distribution option.
+
 Building in VMware Studio
 -------------------------
 

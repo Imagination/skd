@@ -132,8 +132,11 @@ logging.info("Building skd_contrib")
 # skd_contrib
 
 chdir("..")
+
 skd_contrib = tarfile.open("skd_distrib/skd_contrib.tar.gz", "w:gz")
 skd_contrib.add("skd_contrib")
+skd_contrib.close()
+
 chdir("skd_distrib")
 
 install.writelines("tar xzf skd_contrib.tar.gz\n\n")

@@ -73,3 +73,8 @@ https://<the name or ip of your virtual machine>/setup
 
 Log in using the details you provided at the superuser-screen and you're good
 to go.
+
+If you want to fiddle around with the VM (or for better purposes: backup your
+skd database from time to time): The default root password for the vm is
+**password** and you should probably change that after the deployment by
+connecting to the VM with ssh and issuing the "passwd" command.

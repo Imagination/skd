@@ -49,3 +49,27 @@ or [lighttpd](http://redmine.lighttpd.net/projects/lighttpd2/wiki/Howto_WSGI).
 
 Other deployment options are documented on
 [the django site](https://docs.djangoproject.com/en/1.4/howto/deployment/).
+
+Virtual Appliance
+-----------------
+
+skd is also available as a virtual appliance in the OVA-format, mostly used
+within VMware environments. If you have one, grab the ova-file and deploy it
+inside a VMware workstation or using the vSphere client. It's fairly easy.
+
+When it boots up, it compiles all dependencies needed for skd and installs
+them on an appropriate place.
+
+During this installation process you will be asked for a "Django superuser".
+That will be your skd administrator, so answer the question with "yes" and
+add the details.
+
+Please note, that the english keyboard is used during the setup. So beware if
+you're using another keyboard layout!
+
+After the installation finished, use a web browser and start the skd setup at
+
+https://<the name or ip of your virtual machine>/setup
+
+Log in using the details you provided at the superuser-screen and you're good
+to go.
